@@ -2,10 +2,10 @@
   "name": "bubbleduel-api-render",
   "version": "1.0.0",
   "description": "BubbleDuel Roblox verification API for Render",
-  "main": "render-server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node render-server.js",
-    "dev": "node render-server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
