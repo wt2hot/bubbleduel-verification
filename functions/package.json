@@ -1,0 +1,22 @@
+{
+  "name": "bubbleduel-functions",
+  "version": "1.0.0",
+  "description": "Firebase Cloud Functions for BubbleDuel",
+  "main": "index.js",
+  "scripts": {
+    "lint": ".\\node_modules\\.bin\\eslint ."
+  },
+  "dependencies": {
+    "firebase-functions": "^3.18.0",
+    "firebase-admin": "^10.0.0",
+    "axios": "^0.26.0",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "private": true,
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}

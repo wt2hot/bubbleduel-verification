@@ -1,0 +1,2445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlooxyX - Fairness Calculator</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js" type="module"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Custom Tailwind CSS configuration to extend default colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blackest-night': '#0D0D10',
+                        'eclipse': '#15161B',
+                        'off-white': '#F1F1F1',
+                        'steel-mist': '#8A8D99',
+                        'sky-pulse': '#3C60FF',
+                        'cyber-candy': '#C040FF',
+                        'neon-aura': '#6A8FFF',
+                        'pulse-pink': '#E060FF',
+                        'border-dark': '#0A0A0C',
+                        'chat-card-bg': '#0D0E13',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --sky-pulse-color: #3C60FF;
+            --cyber-candy-color: #C040FF;
+        }
+
+        .chat-scroll-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-scroll-area::-webkit-scrollbar-track {
+            background: #08080E;
+            border-radius: 10px;
+        }
+        
+        .chat-input-locked {
+            background-color: rgba(13, 13, 16, 0.8);
+            position: relative;
+        }
+        
+        .chat-input-locked::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(13, 13, 16, 0.2);
+            pointer-events: none;
+        }
+
+        .chat-scroll-area::-webkit-scrollbar-thumb {
+            background: #101116;
+            border-radius: 10px;
+        }
+
+        .chat-scroll-area::-webkit-scrollbar-thumb:hover {
+            background: #333333;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0D0D10;
+        }
+
+        .chat-message-card {
+            background-color: #0D0E13;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(138, 141, 153, 0.2);
+            position: relative;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        .online-users-pulse {
+            animation: pulse-animation 1.5s infinite ease-in-out;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #101116;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid #3C60FF;
+        }
+
+        /* Confirmation modal specific styles */
+        .confirmation-modal-content {
+            background-color: #1A1A2E; /* Darker background for the modal */
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            border: 1px solid #3C60FF; /* Sky Pulse border */
+        }
+        .confirmation-modal-icon {
+            color: #3C60FF; /* Sky Pulse color for the icon */
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        .confirmation-modal-title {
+            color: #F1F1F1; /* Off-white for title */
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .confirmation-modal-message {
+            color: #8A8D99; /* Steel mist for message */
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+        .confirmation-modal-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .confirmation-modal-button.primary {
+            background-color: #6A8FFF; /* Neon Aura for primary button */
+            color: #F1F1F1;
+        }
+        .confirmation-modal-button.primary:hover {
+            background-color: #3C60FF; /* Darker Sky Pulse on hover */
+        }
+        .confirmation-modal-button.secondary {
+            background-color: #2D2D44; /* A slightly lighter dark for secondary button */
+            color: #F1F1F1;
+            border: 1px solid #8A8D99;
+        }
+        .confirmation-modal-button.secondary:hover {
+            background-color: #3A3A55; /* Even lighter dark on hover */
+        }
+        .confirmation-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: #8A8D99;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .calculate-button-animated {
+            animation: button-color-fade 5s infinite alternate;
+        }
+
+        @keyframes button-color-fade {
+            0% { background-color: var(--sky-pulse-color); }
+            50% { background-color: var(--cyber-candy-color); }
+            100% { background-color: var(--sky-pulse-color); }
+        }
+
+        .code-block {
+            background-color: #0A0A0C;
+            color: #F1F1F1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 70vh;
+        }
+
+        /* Spinner animation */
+        .spinner {
+            border: 4px solid rgba(241, 241, 241, 0.3); /* Light grey border */
+            border-top: 4px solid #3C60FF; /* Blue spinner */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Leaderboard Modal Styles */
+        .leaderboard-card {
+            background-color: #15161B; /* eclipse */
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid #3C60FF; /* sky-pulse border */
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .leaderboard-table-header {
+            display: flex;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #2D2D44;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #8A8D99;
+            font-size: 1.1rem;
+        }
+
+        .leaderboard-table-header .leaderboard-rank {
+            width: 15%;
+            text-align: left;
+            padding-left: 1rem;
+        }
+
+        .leaderboard-table-header .leaderboard-user {
+            width: 40%;
+            text-align: left;
+        }
+
+        .leaderboard-table-header .leaderboard-wager,
+        .leaderboard-table-header .leaderboard-profit {
+            width: 22.5%;
+            text-align: left;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(138, 141, 153, 0.1);
+        }
+
+        .leaderboard-row:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            width: 15%;
+            font-weight: bold;
+            text-align: left;
+            font-size: 1.2rem;
+            padding-left: 1rem;
+        }
+
+        .rank-blue {
+            color: #3C60FF;
+        }
+
+        .rank-pink {
+            color: #C040FF;
+        }
+
+        .border-blue {
+            border: 2px solid #3C60FF;
+        }
+
+        .border-pink {
+            border: 2px solid #C040FF;
+        }
+
+        .leaderboard-user {
+            width: 40%;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .leaderboard-user img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .leaderboard-wager,
+        .leaderboard-profit {
+            width: 22.5%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: #F1F1F1;
+        }
+
+        .leaderboard-profit.negative {
+            color: #FF4040;
+        }
+
+        .leaderboard-wager i,
+        .leaderboard-profit i {
+            margin-right: 0.25rem;
+            color: #8A8D99;
+        }
+
+        /* Wallet Modal Styles */
+        .wallet-card {
+            background-color: #15161B; /* eclipse */
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid #0A0A0C; /* border-dark */
+            padding: 1.5rem; /* Reduced padding */
+            width: 100%;
+            max-width: 600px; /* Smaller max-width for the component */
+            min-height: 500px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem; /* Adjusted margin */
+        }
+        .wallet-header h1 {
+            font-size: 2.25rem; /* Adjusted font size */
+        }
+        .wallet-header i {
+            font-size: 1.25rem; /* Adjusted icon size */
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            padding-right: 2.5rem; /* Space for icon */
+        }
+
+        .input-group .icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8A8D99;
+        }
+
+        /* Dropdown specific styles */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-button {
+            background-color: #0D0D10; /* blackest-night */
+            color: #F1F1F1;
+            padding: 0.6rem 1rem; /* Adjusted padding */
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid #2D2D44; /* darker shade for border */
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem; /* Adjusted font size */
+        }
+
+        .dropdown-button:hover {
+            background-color: #1A1B20;
+        }
+
+        .dropdown-options {
+            position: absolute;
+            background-color: #0D0D10; /* blackest-night */
+            border-radius: 0.5rem;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            min-width: 100%;
+            margin-top: 0.5rem;
+            overflow: hidden; /* Ensures rounded corners */
+            border: 1px solid #2D2D44;
+        }
+
+        .dropdown-options div {
+            padding: 0.6rem 1rem; /* Adjusted padding */
+            color: #F1F1F1;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.9rem; /* Adjusted font size */
+        }
+
+        .dropdown-options div:hover {
+            background-color: #1A1B20;
+        }
+
+        .dropdown-options.hidden {
+            display: none;
+        }
+
+        /* Item grid display */
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Smaller responsive grid */
+            gap: 0.75rem; /* Adjusted gap */
+            flex-grow: 1; /* Allow grid to take available space */
+            overflow-y: auto; /* Enable scrolling if many items */
+            padding-right: 0.5rem; /* For scrollbar space */
+            margin-bottom: 1rem; /* Space before action buttons */
+            max-height: 300px; /* Fixed height for scrollable area (adjust as needed) */
+        }
+
+        /* Custom scrollbar for the item grid */
+        .item-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .item-grid::-webkit-scrollbar-track {
+            background: #1A1B20; /* Darker gray for the track */
+            border-radius: 10px;
+        }
+
+        .item-grid::-webkit-scrollbar-thumb {
+            background: #8A8D99; /* Steel mist for the thumb */
+            border-radius: 10px;
+        }
+
+        .item-grid::-webkit-scrollbar-thumb:hover {
+            background: #F1F1F1; /* Off-white on hover */
+        }
+
+        .item-grid-item {
+            background-color: #0D0D10; /* blackest-night */
+            border: 1px solid #2D2D44;
+            border-radius: 0.75rem;
+            padding: 0.75rem; /* Adjusted padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; /* Added border-color transition */
+            position: relative; /* For absolute positioning of the large value */
+            padding-bottom: 3.5rem; /* Make space for the large value at the bottom */
+        }
+
+        .item-grid-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .item-grid-item.selected {
+            border-color: #C040FF; /* Cyber Candy for selected item border */
+            box-shadow: 0px 0px 10px rgba(192, 64, 255, 0.5); /* Glowing effect */
+        }
+
+        .item-grid-item img {
+            width: 70px; /* Smaller image size */
+            height: 70px; /* Smaller image size */
+            object-fit: contain;
+            margin-bottom: 0.4rem; /* Adjusted margin */
+            border-radius: 0.375rem; /* Slightly rounded corners for the image */
+        }
+
+        .item-grid-item .item-name {
+            font-size: 0.8rem; /* Smaller font size */
+            font-weight: 500;
+            color: #F1F1F1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%; /* Ensure text ellipsis works */
+        }
+
+        .item-grid-item .item-value {
+            font-size: 0.75rem; /* Smaller font size */
+            color: #C040FF; /* Cyber Candy for gem value */
+            display: flex;
+            align-items: center;
+            position: absolute; /* Position relative to parent for visibility */
+            top: 10px; /* Adjust as needed to not overlap with image */
+            right: 10px; /* Adjust as needed */
+            background-color: #0D0D10; /* Ensure it's on top of other elements */
+            padding: 0.2em 0.4em;
+            border-radius: 0.3em;
+            z-index: 2; /* Ensure it's above the image if needed */
+        }
+
+        .item-grid-item .item-value i {
+            margin-right: 0.2rem;
+            color: #C040FF; /* Cyber Candy for gem icon */
+        }
+
+        .item-grid-item .large-value {
+            position: absolute;
+            bottom: 0; /* Position at the very bottom */
+            left: 0;
+            right: 0;
+            font-size: 1.25rem; /* Adjusted large font size */
+            font-weight: bold;
+            color: #F1F1F1; /* Off-white color */
+            background-color: #0D0D10; /* blackest-night background for the value area */
+            padding: 0.5rem 0;
+            border-top: 1px solid #2D2D44; /* Separator line */
+            border-bottom-left-radius: 0.75rem; /* Match parent border-radius */
+            border-bottom-right-radius: 0.75rem; /* Match parent border-radius */
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end; /* Align to right */
+            gap: 0.75rem; /* Adjusted gap */
+            margin-top: 1rem; /* Adjusted margin between grid and action buttons */
+            flex-shrink: 0; /* Prevent buttons from shrinking */
+        }
+
+        .action-buttons button {
+            background-color: #0D0D10; /* blackest-night */
+            color: #F1F1F1;
+            padding: 0.6rem 1.2rem; /* Adjusted padding */
+            border-radius: 0.5rem;
+            border: 1px solid #2D2D44;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem; /* Adjusted font size */
+        }
+
+        .action-buttons button:hover {
+            background-color: #1A1B20;
+        }
+
+        .action-buttons .deposit-button {
+            background-color: #3C60FF; /* sky-pulse */
+            border-color: #3C60FF;
+        }
+        .action-buttons .deposit-button:hover {
+            background-color: #6A8FFF; /* neon-aura */
+        }
+
+        .action-buttons .withdraw-button {
+            background-color: #C040FF; /* cyber-candy */
+            border-color: #C040FF;
+        }
+
+        .action-buttons .withdraw-button:hover {
+            background-color: #E060FF; /* pulse-pink */
+        }
+
+        /* No items message and button container */
+        .no-items-container {
+            text-align: center;
+            padding-top: 50px; /* Adjust as needed */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .no-items-container .deposit-button-large {
+            margin-top: 20px;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background-color: #3C60FF; /* sky-pulse */
+            color: #F1F1F1;
+            transition: background-color 0.3s ease;
+        }
+        .no-items-container .deposit-button-large:hover {
+            background-color: #6A8FFF; /* neon-aura */
+        }
+
+        /* Value bar style */
+        .value-bar {
+            background-color: #0D0D10; /* blackest-night */
+            border-radius: 0.75rem;
+            border: 1px solid #2D2D44;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem; /* Space between value bar and item grid */
+        }
+
+        .value-bar span {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #F1F1F1;
+        }
+
+        .value-bar .value-amount {
+            color: #C040FF; /* Cyber Candy color for the value */
+            margin-left: 0.5rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            padding-right: 2.5rem;
+        }
+
+        .input-group .icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8A8D99;
+        }
+
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-button {
+            background-color: #0D0D10;
+            color: #F1F1F1;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid #2D2D44;
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-button:hover {
+            background-color: #1A1B20;
+        }
+
+        .dropdown-options {
+            position: absolute;
+            background-color: #0D0D10;
+            border-radius: 0.5rem;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            min-width: 100%;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            border: 1px solid #2D2D44;
+        }
+
+        .dropdown-options div {
+            padding: 0.6rem 1rem;
+            color: #F1F1F1;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-options div:hover {
+            background-color: #1A1B20;
+        }
+
+        .dropdown-options.hidden {
+            display: none;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            padding-right: 2.5rem;
+        }
+
+        .input-group .icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8A8D99;
+        }
+
+        /* Leaderboard Modal Styles */
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-shrink: 0;
+        }
+
+        .action-buttons button {
+            background-color: #0D0D10;
+            color: #F1F1F1;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            border: 1px solid #2D2D44;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons button:hover {
+            background-color: #1A1B20;
+        }
+
+        .action-buttons .deposit-button {
+            background-color: #3C60FF;
+            border-color: #3C60FF;
+        }
+
+        .action-buttons .deposit-button:hover {
+            background-color: #6A8FFF;
+        }
+
+        .action-buttons .withdraw-button {
+            background-color: #C040FF;
+            border-color: #C040FF;
+        }
+
+        .action-buttons .withdraw-button:hover {
+            background-color: #E060FF;
+        }
+
+        .no-items-container {
+            text-align: center;
+            padding-top: 50px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .no-items-container .deposit-button-large {
+            margin-top: 20px;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background-color: #3C60FF;
+            color: #F1F1F1;
+            transition: background-color 0.3s ease;
+        }
+
+        .no-items-container .deposit-button-large:hover {
+            background-color: #6A8FFF;
+        }
+
+        .value-bar {
+            background-color: #0D0D10;
+            border-radius: 0.75rem;
+            border: 1px solid #2D2D44;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .value-bar span {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #F1F1F1;
+        }
+
+        .value-bar .value-amount {
+            color: #C040FF;
+            margin-left: 0.5rem;
+        }
+
+        /* Deposit Modal Styles */
+        .deposit-modal-container {
+            background-color: #15161B; /* eclipse */
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid #0A0A0C; /* border-dark */
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin: auto;
+        }
+
+        .deposit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .deposit-header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #F1F1F1;
+        }
+        .deposit-header .close-button {
+            font-size: 1.5rem;
+            color: #8A8D99;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            background: none;
+            border: none;
+        }
+        .deposit-header .close-button:hover {
+            color: #F1F1F1;
+        }
+
+        .instructions p {
+            font-size: 1rem;
+            color: #8A8D99;
+            margin-bottom: 1.5rem;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        .instruction-number {
+            background-color: #3C60FF;
+            color: #F1F1F1;
+            width: 28px;
+            height: 28px;
+            border-radius: 9999px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            margin-right: 0.75rem;
+        }
+        .instruction-text {
+            color: #F1F1F1;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .bot-list {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .bot-card {
+            background-color: #1A1B20;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(138, 141, 153, 0.2);
+            transition: border-color 0.2s ease;
+        }
+        .bot-card:hover {
+            border-color: #3C60FF;
+        }
+
+        .bot-info {
+            display: flex;
+            align-items: center;
+        }
+        .bot-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.5rem;
+            margin-right: 1rem;
+        }
+        .bot-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .bot-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #F1F1F1;
+            margin-right: 0.5rem;
+        }
+        .bot-game {
+            font-size: 0.875rem;
+            color: #8A8D99;
+        }
+
+        .bot-status-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .bot-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 9999px;
+            margin-right: 0.25rem;
+        }
+
+        .online-dot {
+            background-color: #22C55E;
+            animation: beep-online 1.5s infinite ease-in-out;
+        }
+
+        .offline-dot {
+            background-color: #EF4444;
+            animation: beep-offline 1.5s infinite ease-in-out;
+        }
+
+        .status-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .online-text {
+            color: #22C55E;
+        }
+
+        .offline-text {
+            color: #EF4444;
+        }
+
+        @keyframes beep-online {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        @keyframes beep-offline {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        .join-button {
+            background-color: #3C60FF;
+            color: #F1F1F1;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .join-button:hover {
+            background-color: #6A8FFF;
+        }
+
+        .security-tip {
+            background-color: rgba(138, 141, 153, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: #8A8D99;
+            border: 1px solid rgba(138, 141, 153, 0.2);
+            margin-top: 1.5rem;
+        }
+
+        .balance-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #0A0A0C;
+        }
+    </style>
+</head>
+<body class="bg-blackest-night text-off-white min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-eclipse p-4 flex items-center justify-between shadow-xl rounded-b-xl mx-4 mt-4 border-b border-border-dark">
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-3">
+                <img src="https://placehold.co/48x48/C040FF/FFFFFF?text=BX" alt="BloxyX Logo" class="rounded-full shadow-lg border-2 border-cyber-candy">
+                <span class="text-4xl font-extrabold text-cyber-candy tracking-wider">BloxyX</span>
+            </div>
+            <a href="bubble.html" class="text-steel-mist hover:text-cyber-candy px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 text-xl font-semibold">
+                <i class="fas fa-home text-2xl"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" id="leaderboardButton" class="text-steel-mist hover:text-sky-pulse px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 text-xl font-semibold">
+                <i class="fas fa-trophy text-2xl"></i>
+                <span>Leaderboard</span>
+            </a>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="walletButton" class="bg-eclipse text-steel-mist px-7 py-3 rounded-full hover:bg-border-dark transition-colors duration-300 flex items-center space-x-2 shadow-lg transform hover:scale-105 border border-border-dark">
+                <i class="fas fa-wallet text-sky-pulse text-xl"></i>
+                <span id="walletBalance" class="font-bold text-xl">Loading...</span>
+            </button>
+            <button class="bg-cyber-candy text-off-white px-7 py-3 rounded-full hover:bg-pulse-pink transition-colors duration-300 flex items-center space-x-2 shadow-lg transform hover:scale-105" id="loginButton">
+                <i class="fas fa-sign-in-alt text-xl"></i>
+                <span class="font-bold text-xl">Login</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area with Sidebars -->
+    <div class="flex flex-grow mt-6 mx-4">
+        <!-- Left Sidebar -->
+        <aside class="w-[10%] bg-eclipse p-6 rounded-xl shadow-xl mr-6 flex flex-col justify-between items-center border border-border-dark">
+            <div>
+                <div class="flex flex-col items-center space-y-10">
+                    <a href="coinflip.html" class="flex flex-col items-center space-y-2 cursor-pointer transition-all duration-200 group active:scale-105" style="text-decoration: none;">
+                        <i class="fas fa-dice text-steel-mist text-4xl group-hover:text-sky-pulse"></i>
+                        <span class="text-steel-mist text-base font-semibold group-hover:text-sky-pulse">Games</span>
+                    </a>
+                    <a href="aboutus.html" class="flex flex-col items-center space-y-2 cursor-pointer transition-all duration-200 group active:scale-105" style="text-decoration: none;">
+                        <i class="fas fa-info-circle text-steel-mist text-4xl group-hover:text-sky-pulse"></i>
+                        <span class="text-steel-mist text-base font-semibold group-hover:text-sky-pulse">About</span>
+                    </a>
+                    <a href="#logout" id="logoutButton" class="flex flex-col items-center space-y-2 cursor-pointer transition-all duration-200 group active:scale-105" style="text-decoration: none;">
+                        <i class="fas fa-sign-out-alt text-steel-mist text-4xl group-hover:text-sky-pulse"></i>
+                        <span class="text-steel-mist text-base font-semibold group-hover:text-sky-pulse">Logout</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Socials and Terms of Service -->
+            <div class="pt-6 border-t border-border-dark w-full flex flex-col items-center space-y-6">
+                <div class="flex justify-center w-full">
+                    <a href="https://discord.gg/e25gcs9yjX" class="text-steel-mist hover:text-sky-pulse transition-colors duration-200 text-4xl">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                </div>
+                <a href="terms.html" class="text-steel-mist hover:text-off-white transition-colors duration-200 text-base font-semibold px-5 py-3 rounded-lg border border-border-dark hover:border-steel-mist">
+                    Terms of Service
+                </a>
+                <div class="flex justify-center w-full">
+                    <a href="fairness.html" class="text-steel-mist hover:text-sky-pulse transition-colors duration-200 text-4xl text-center">
+                        <i class="fas fa-calculator"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Central Content Area for Fairness Calculator -->
+        <main class="flex-grow bg-eclipse p-8 rounded-xl shadow-xl border border-border-dark overflow-y-auto flex flex-col items-center">
+            <h1 class="text-4xl font-extrabold text-off-white mb-8 text-center">Coinflip Fairness Calculator</h1>
+
+            <div class="w-full max-w-lg bg-blackest-night p-8 rounded-xl shadow-lg border border-border-dark space-y-6">
+                <div class="flex flex-col space-y-4">
+                    <div>
+                        <label for="serverSeed" class="block text-steel-mist text-lg font-semibold mb-2">Server Seed</label>
+                        <input type="text" id="serverSeed" placeholder="Enter server seed here"
+                               class="w-full p-3 rounded-lg bg-eclipse text-off-white border border-border-dark focus:outline-none focus:border-sky-pulse focus:ring-1 focus:ring-sky-pulse text-lg">
+                    </div>
+                    <div>
+                        <label for="clientSeed" class="block text-steel-mist text-lg font-semibold mb-2">Client Seed</label>
+                        <input type="text" id="clientSeed" placeholder="Enter client seed here"
+                               class="w-full p-3 rounded-lg bg-eclipse text-off-white border border-border-dark focus:outline-none focus:border-sky-pulse focus:ring-1 focus:ring-sky-pulse text-lg">
+                    </div>
+                    <div>
+                        <label for="playerABet" class="block text-steel-mist text-lg font-semibold mb-2">Player's Value ($)</label>
+                        <input type="number" id="playerABet" step="0.01" value="0"
+                               class="w-full p-3 rounded-lg bg-eclipse text-off-white border border-border-dark focus:outline-none focus:border-sky-pulse focus:ring-1 focus:ring-sky-pulse text-lg">
+                    </div>
+                    <div>
+                        <label for="playerBBet" class="block text-steel-mist text-lg font-semibold mb-2">Joiner's Value ($)</label>
+                        <input type="number" id="playerBBet" step="0.01" value="0"
+                               class="w-full p-3 rounded-lg bg-eclipse text-off-white border border-border-dark focus:outline-none focus:border-sky-pulse focus:ring-1 focus:ring-sky-pulse text-lg">
+                    </div>
+                </div>
+
+                <button id="calculateFairness"
+                        class="w-full px-8 py-4 rounded-lg transition-colors duration-300 font-bold text-xl shadow-lg transform hover:scale-105 calculate-button-animated">
+                    Calculate Fairness
+                </button>
+
+                <div id="chances" class="bg-eclipse p-6 rounded-lg border border-border-dark text-off-white space-y-3">
+                    <p class="text-xl font-semibold">Chances:</p>
+                    <p id="chanceA" class="text-lg text-sky-pulse"></p>
+                    <p id="chanceB" class="text-lg text-cyber-candy"></p>
+                    <div id="loadingSpinner" class="hidden flex justify-center items-center py-4">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+
+                <button id="showScriptButton"
+                        class="w-full bg-border-dark text-off-white px-8 py-3 rounded-lg hover:bg-sky-pulse hover:text-off-white transition-colors duration-300 font-semibold text-lg shadow-md">
+                    Show Calculation Script
+                </button>
+            </div>
+        </main>
+
+        <!-- Right Sidebar (Chat) -->
+        <aside class="w-[18%] bg-eclipse p-6 rounded-xl shadow-xl ml-6 flex flex-col border border-border-dark h-[calc(100vh-8rem)]">
+            <div class="flex items-center justify-between mb-6 flex-shrink-0">
+                <h3 class="text-3xl font-bold text-off-white">Chat</h3>
+                <button id="chatOptionsButton" class="text-steel-mist hover:text-cyber-candy transition-colors duration-200 text-xl">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto chat-scroll-area pr-3 mb-6">
+                <!-- Chat Messages -->
+                <div class="space-y-4 flex flex-col-reverse">
+                    <!-- Messages will be loaded from Firebase -->
+                </div>
+            </div>
+            
+            <!-- Chat Input -->
+            <div class="flex-shrink-0">
+                <!-- Online Users Count and Icon -->
+                <div class="flex items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-green-500 rounded-full online-users-pulse"></div>
+                    <span class="text-steel-mist text-base font-semibold">130</span>
+                    <i class="fas fa-users text-steel-mist text-xl"></i>
+                </div>
+                <!-- Input field with integrated icons -->
+                <div class="relative flex items-center w-full rounded-lg overflow-hidden bg-blackest-night border border-border-dark chat-input-locked">
+                    <input type="text" id="chatInput" placeholder="Login to chat" class="flex-grow bg-blackest-night text-off-white px-5 py-3 focus:outline-none focus:ring-0 border-none text-base font-medium pr-12 h-12 cursor-pointer hover:bg-eclipse transition-colors duration-200" readonly>
+                    <div id="sendIconContainer" class="absolute right-0 top-0 h-full flex items-center justify-center cursor-pointer px-4 bg-sky-pulse rounded-r-lg hover:bg-neon-aura transition-colors duration-200">
+                        <i class="fas fa-paper-plane text-lg text-off-white"></i>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Chat Rules Modal -->
+    <div id="chatRulesModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-3xl font-bold text-off-white mb-6 text-center">Chat Rules</h3>
+            <ul class="list-disc list-inside text-steel-mist text-lg space-y-3 mb-8">
+                <li>Be respectful to others at all times.</li>
+                <li>No spamming, trolling, or advertising.</li>
+                <li>Do not share personal info or ask for it.</li>
+                <li>Use appropriate language; hate speech is not tolerated.</li>
+                <li>Follow all community guidelines and moderator instructions.</li>
+            </ul>
+            <button id="understandButton" class="w-full bg-sky-pulse text-off-white px-8 py-4 rounded-lg hover:bg-neon-aura transition-colors duration-300 font-bold text-xl shadow-lg">
+                I Understand
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal Component -->
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="confirmation-modal-content">
+            <i class="fas fa-times confirmation-modal-close" id="closeConfirmationModal"></i>
+            <i class="fas fa-sign-out-alt confirmation-modal-icon" id="confirmationModalIcon"></i>
+            <h3 class="confirmation-modal-title" id="confirmationModalTitle">Confirm Action</h3>
+            <p class="confirmation-modal-message" id="confirmationModalMessage">Are you sure you want to proceed?</p>
+            <div class="flex justify-center space-x-4">
+                <button class="confirmation-modal-button primary" id="confirmActionButton">Confirm</button>
+                <button class="confirmation-modal-button secondary" id="cancelActionButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Display Modal -->
+    <div id="scriptModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-2xl">
+            <h3 class="text-3xl font-bold text-off-white mb-6 text-center">Fairness Calculation Script</h3>
+            <pre class="code-block">
+                <code id="calculationScriptCode">
+function generateDeterministicRandom(serverSeed, clientSeed) {
+    // This hash function is a simple example. For production, use a cryptographic hash like SHA-256.
+    const combinedString = `${serverSeed}-${clientSeed}`;
+    let hash = 0;
+    for (let i = 0; i < combinedString.length; i++) {
+        const char = combinedString.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0; // Convert to 32bit integer
+    }
+    // Normalize to a value between 0 and 100
+    return Math.abs(hash % 100000) / 1000; // Scale to 0-100 with decimals
+}
+
+function calculateFairness() {
+    const serverSeed = document.getElementById('serverSeed').value;
+    const clientSeed = document.getElementById('clientSeed').value;
+    const playerA = parseFloat(playerABetInput.value);
+    const playerB = parseFloat(playerBBetInput.value);
+
+    // Validate for empty fields
+    if (serverSeed.trim() === '' || clientSeed.trim() === '' || isNaN(playerA) || isNaN(playerB)) {
+        chanceAOutput.textContent = 'Player A Chance: Please fill in all fields.';
+        chanceBOutput.textContent = 'Player B Chance: Please fill in all fields.';
+        loadingSpinner.classList.add('hidden');
+        return;
+    }
+
+    // Validate seed format (alphanumeric and hyphens only)
+    const seedRegex = /^[a-zA-Z0-9-]+$/;
+    if (!seedRegex.test(serverSeed)) {
+        chanceAOutput.textContent = 'Player A Chance: Server Seed must be alphanumeric or hyphens only.';
+        chanceBOutput.textContent = 'Player B Chance: Invalid Server Seed.';
+        loadingSpinner.classList.add('hidden');
+        return;
+    }
+    if (!seedRegex.test(clientSeed)) {
+        chanceAOutput.textContent = 'Player A Chance: Client Seed must be alphanumeric or hyphens only.';
+        chanceBOutput.textContent = 'Player B Chance: Invalid Client Seed.';
+        loadingSpinner.classList.add('hidden');
+        return;
+    }
+
+    // Validate seed length
+    if (serverSeed.length < 32 || serverSeed.length > 64) {
+        chanceAOutput.textContent = 'Player A Chance: Server Seed must be 32-64 characters.';
+        chanceBOutput.textContent = 'Player B Chance: Invalid Server Seed length.';
+        loadingSpinner.classList.add('hidden');
+        return;
+    }
+    if (clientSeed.length < 8 || clientSeed.length > 32) {
+        chanceAOutput.textContent = 'Player A Chance: Client Seed must be 8-32 characters.';
+        chanceBOutput.textContent = 'Player B Chance: Invalid Client Seed length.';
+        loadingSpinner.classList.add('hidden');
+        return;
+    }
+
+    // Validate bet amounts
+    if (playerA < 0 || playerB < 0) {
+        chanceAOutput.textContent = 'Player A Chance: Bet amounts cannot be negative.';
+        chanceBOutput.textContent = 'Player B Chance: Bet amounts cannot be negative.';
+        loadingSpinner.classList.add('hidden');
+        return;
+    }
+
+    if (playerA === 0 && playerB === 0) {
+        chanceAOutput.textContent = 'Player A Chance: At least one bet must be greater than 0.';
+        chanceBOutput.textContent = 'Player B Chance: At least one bet must be greater than 0.';
+        loadingSpinner.classList.add('hidden');
+        return;
+    }
+
+
+    const total = playerA + playerB;
+    let chanceA = (playerA / total) * 100;
+    let chanceB = (playerB / total) * 100;
+
+    if (playerA === 0 && playerB > 0) {
+        chanceA = 0;
+        chanceB = 100;
+    } else if (playerB === 0 && playerA > 0) {
+        chanceA = 100;
+        chanceB = 0;
+    } else if (playerA === 0 && playerB === 0) {
+        chanceA = 50;
+        chanceB = 50;
+    }
+
+    const derivedRand = generateDeterministicRandom(serverSeed, clientSeed);
+    let winnerText = '';
+
+    if (derivedRand < chanceA) {
+        winnerText = 'Player A wins!';
+    } else {
+        winnerText = 'Player B wins!';
+    }
+
+    chanceAOutput.textContent = `Player A Chance: ${chanceA.toFixed(2)}%`;
+    chanceBOutput.textContent = `Player B Chance: ${chanceB.toFixed(2)}%`;
+}
+                </code>
+            </pre>
+            <button id="closeScriptModalButton" class="w-full bg-sky-pulse text-off-white px-8 py-4 rounded-lg hover:bg-neon-aura transition-colors duration-300 font-bold text-xl shadow-lg mt-6">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal-overlay hidden">
+        <div class="leaderboard-card">
+            <div class="leaderboard-header">
+                <h1 class="text-3xl font-extrabold text-off-white">LEADERBOARD</h1>
+                <i class="fas fa-times text-steel-mist text-xl cursor-pointer hover:text-off-white" id="closeLeaderboardModal"></i>
+            </div>
+
+            <div class="leaderboard-table-header">
+                <div class="leaderboard-rank">#</div>
+                <div class="leaderboard-user">User</div>
+                <div class="leaderboard-wager">Wager</div>
+                <div class="leaderboard-profit">Profit</div>
+            </div>
+
+            <div id="leaderboardList">
+                <!-- Leaderboard rows will be dynamically inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Modal -->
+    <div id="walletModal" class="modal-overlay hidden">
+        <div class="wallet-card">
+            <div class="wallet-header">
+                <h1 class="text-3xl font-extrabold text-off-white">WALLET</h1>
+                <i class="fas fa-times text-steel-mist text-xl cursor-pointer hover:text-off-white" id="closeWalletModal"></i>
+            </div>
+
+            <div class="flex items-center justify-between mb-6 space-x-4">
+                <div class="relative flex-grow input-group">
+                    <input type="text" id="searchInput" placeholder="Search for an item..." class="w-full bg-blackest-night text-off-white px-4 py-3 rounded-lg border border-border-dark focus:outline-none focus:ring-1 focus:ring-sky-pulse">
+                    <i class="fas fa-search icon"></i>
+                </div>
+
+                <div class="dropdown-container">
+                    <button id="sortDropdownButton" class="dropdown-button">
+                        Highest to Lowest
+                        <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div id="sortDropdownOptions" class="dropdown-options hidden">
+                        <div data-value="highest-lowest">Highest to Lowest</div>
+                        <div data-value="lowest-highest">Lowest to Highest</div>
+                    </div>
+                </div>
+
+                <div class="dropdown-container">
+                    <button id="gameDropdownButton" class="dropdown-button">
+                        All Games
+                        <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div id="gameDropdownOptions" class="dropdown-options hidden">
+                        <div data-value="all-games">All Games</div>
+                        <div data-value="bsgi">BSGI</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items grid container -->
+            <div id="itemsGridContainer" class="flex-grow flex flex-col">
+                <!-- Value Bar -->
+                <div class="value-bar">
+                    <span>Value:</span>
+                    <span id="currentFilteredValueDisplay" class="value-amount">0</span>
+                </div>
+
+                <div id="itemsGrid" class="item-grid">
+                    <!-- Items will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Select All and Withdraw buttons -->
+            <div class="action-buttons">
+                <button id="selectAllButton">Select all</button>
+                <button class="action-button deposit-button" id="depositButton">Deposit</button>
+                <button class="withdraw-button" id="withdrawButton">Withdraw B$0</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Items Modal -->
+    <div id="depositModal" class="modal-overlay hidden">
+        <div class="deposit-modal-container">
+            <div class="deposit-header">
+                <h1>Deposit Items</h1>
+                <button class="close-button" id="closeDepositModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="instructions">
+                <p>Deposit your Roblox items to BubbleDuel in seconds.</p>
+                <div class="instruction-item">
+                    <div class="instruction-number">1</div>
+                    <p class="instruction-text">Select an active bot from the list below and click "Join" to initiate a trade.</p>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-number">2</div>
+                    <p class="instruction-text">Confirm the trade transaction within your Roblox account to finalize the deposit.</p>
+                </div>
+                <div class="instruction-item">
+                    <div class="instruction-number">3</div>
+                    <p class="instruction-text">Once confirmed, your items will be securely added to your BubbleDuel inventory.</p>
+                </div>
+            </div>
+
+            <div class="bot-list">
+                <!-- Bot Card 1: PucekGoatedFr -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-082F2C2BD1695CAB4F252DE1EBFE5F6D-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="PucekGoatedFr Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">PucekGoatedFr</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot online-dot"></span>
+                                    <span class="status-text online-text">Online</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining PucekGoatedFr!')">Join</button>
+                </div>
+
+                <!-- Bot Card 2: ZedGoatedFr -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C8681DD9D8F8101B2E96C6F9F0C6BDD-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="ZedGoatedFr Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">ZedGoatedFr</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot online-dot"></span>
+                                    <span class="status-text online-text">Online</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining ZedGoatedFr!')">Join</button>
+                </div>
+
+                <!-- Bot Card 3: TharskyGoatedFr -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-FE8D9ADAF612535E3A35FB208FEFE339-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="TharskyGoatedFr Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">TharskyGoatedFr</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot online-dot"></span>
+                                    <span class="status-text online-text">Online</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining TharskyGoatedFr!')">Join</button>
+                </div>
+
+                <!-- Bot Card 4: Bsgi_Flip (Offline) -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-22F7E8D8DA06B911761129365A47481A-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="Bsgi_Flip Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">Bsgi_Flip</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot offline-dot"></span>
+                                    <span class="status-text offline-text">Offline</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining Bsgi_Flip!')">Join</button>
+                </div>
+            </div>
+
+            <div class="security-tip">
+                <strong>Important Security Notice:</strong> Always double-check the username of any trading partner. Be aware that impersonators may use similar names or avatars to deceive you!
+            </div>
+
+            <div class="balance-footer">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatInput = document.getElementById('chatInput');
+        const sendIconContainer = document.getElementById('sendIconContainer');
+        const chatOptionsButton = document.getElementById('chatOptionsButton');
+        const chatRulesModal = document.getElementById('chatRulesModal');
+        const understandButton = document.getElementById('understandButton');
+        const walletBalanceSpan = document.getElementById('walletBalance');
+
+        // Calculator elements
+        const serverSeedInput = document.getElementById('serverSeed');
+        const clientSeedInput = document.getElementById('clientSeed');
+        const playerABetInput = document.getElementById('playerABet');
+        const playerBBetInput = document.getElementById('playerBBet');
+        const calculateButton = document.getElementById('calculateFairness');
+        const chanceAOutput = document.getElementById('chanceA');
+        const chanceBOutput = document.getElementById('chanceB');
+        const showScriptButton = document.getElementById('showScriptButton');
+        const scriptModal = document.getElementById('scriptModal');
+        const closeScriptModalButton = document.getElementById('closeScriptModalButton');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // Leaderboard elements
+        const leaderboardButton = document.getElementById('leaderboardButton');
+        const leaderboardModal = document.getElementById('leaderboardModal');
+        const closeLeaderboardModal = document.getElementById('closeLeaderboardModal');
+
+        // Wallet elements
+        const walletButton = document.getElementById('walletButton');
+        const walletModal = document.getElementById('walletModal');
+        const closeWalletModal = document.getElementById('closeWalletModal');
+
+        // Deposit elements
+        const depositModal = document.getElementById('depositModal');
+        const closeDepositModal = document.getElementById('closeDepositModal');
+
+        // Leaderboard data
+        const leaderboardData = [
+            { rank: 1, user: "BorderBandit205", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "601.1M", profit: "5.8M" },
+            { rank: 2, user: "tharskyhitter", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "401.0M", profit: "16.0M" },
+            { rank: 3, user: "Elikanroblox", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "396.0M", profit: "6.9M" },
+            { rank: 4, user: "BGS_HHA", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "391.7M", profit: "-2.3M" },
+            { rank: 5, user: "FlippingBurgers...", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "332.2M", profit: "4.3M" },
+            { rank: 6, user: "Griemmfiend", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "258.3M", profit: "2.6M" },
+            { rank: 7, user: "PlayerSeven", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "200.0M", profit: "1.5M" },
+            { rank: 8, user: "GamerEight", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "180.0M", profit: "-0.5M" },
+            { rank: 9, user: "NinthPlayer", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "150.0M", profit: "3.0M" },
+            { rank: 10, user: "TenaciousGamer", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "120.0M", profit: "0.8M" }
+        ];
+
+        // Wallet data
+        const allWalletItems = [
+            { name: "Overlord Plushie", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 80, largeValue: 4000, game: "BSGI" },
+            { name: "Shiny Sword of Awesomeness", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 120, largeValue: 6000, game: "All Games" },
+            { name: "Legendary Shield", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 70, largeValue: 3500, game: "BSGI" },
+            { name: "Magic Potion", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 30, largeValue: 1500, game: "All Games" },
+            { name: "Rare Gemstone of Power", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 200, largeValue: 10000, game: "BSGI" },
+            { name: "Enchanted Bow", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 90, largeValue: 4500, game: "All Games" },
+            { name: "Mystic Amulet", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 60, largeValue: 3000, game: "BSGI" },
+            { name: "Swift Boots", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 40, largeValue: 2000, game: "All Games" },
+            { name: "Dragon Scale Armor", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 250, largeValue: 12500, game: "BSGI" },
+            { name: "Phoenix Feather", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 150, largeValue: 7500, game: "All Games" },
+            { name: "Glimmering Orb", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 50, largeValue: 2500, game: "BSGI" },
+            { name: "Ancient Scroll", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 100, largeValue: 5000, game: "All Games" },
+            { name: "Shadow Dagger", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 110, largeValue: 5500, game: "BSGI" },
+            { name: "Crystal Wand", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 130, largeValue: 6500, game: "All Games" },
+            { name: "Elixir of Life", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 75, largeValue: 3750, game: "BSGI" },
+            { name: "Titan's Gauntlet", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 300, largeValue: 15000, game: "All Games" },
+            { name: "Frosty Blade", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 95, largeValue: 4750, game: "BSGI" },
+            { name: "Inferno Staff", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 180, largeValue: 9000, game: "All Games" },
+            { name: "Windwalker Boots", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 65, largeValue: 3250, game: "BSGI" },
+            { name: "Starfall Robes", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 220, largeValue: 11000, game: "All Games" },
+            { name: "Ocean's Embrace", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 140, largeValue: 7000, game: "BSGI" },
+            { name: "Desert Scimitar", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 85, largeValue: 4250, game: "All Games" },
+            { name: "Forest Guardian Helm", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 105, largeValue: 5250, game: "BSGI" },
+            { name: "Volcanic Axe", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 170, largeValue: 8500, game: "All Games" }
+        ];
+
+        let currentFilteredItems = [...allWalletItems];
+        let currentSortOrder = 'highest-lowest';
+        let currentGameFilter = 'all-games';
+
+
+        // Function to generate a deterministic random number based on seeds
+        function generateDeterministicRandom(serverSeed, clientSeed) {
+            const combinedString = `${serverSeed}-${clientSeed}`;
+            let hash = 0;
+            for (let i = 0; i < combinedString.length; i++) {
+                const char = combinedString.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash |= 0; // Convert to 32bit integer
+            }
+            // Normalize to a value between 0 and 100 with decimals
+            return Math.abs(hash % 100000) / 1000;
+        }
+
+        // Function to fetch and display wallet balance
+        async function fetchWalletBalance() {
+            try {
+                const response = await new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve({
+                            ok: true,
+                            json: () => Promise.resolve({
+                                balance: 123456
+                            })
+                        });
+                    }, 300);
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                walletBalanceSpan.textContent = data.balance.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching wallet balance:', error);
+                walletBalanceSpan.textContent = 'Error';
+            }
+        }
+
+        // Function to calculate and display fairness
+        function calculateFairness() {
+            // Show spinner and clear previous results
+            loadingSpinner.classList.remove('hidden');
+            chanceAOutput.textContent = ''; // Clear content
+            chanceBOutput.textContent = ''; // Clear content
+
+            // Get current values
+            const serverSeed = serverSeedInput.value;
+            const clientSeed = clientSeedInput.value;
+            const playerA = parseFloat(playerABetInput.value);
+            const playerB = parseFloat(playerBBetInput.value);
+
+            // Validation for empty fields
+            if (serverSeed.trim() === '' || clientSeed.trim() === '' || isNaN(playerA) || isNaN(playerB)) {
+                chanceAOutput.textContent = 'Player A Chance: Please fill in all fields.';
+                chanceBOutput.textContent = 'Player B Chance: Please fill in all fields.';
+                loadingSpinner.classList.add('hidden'); // Hide spinner on error
+                return; // Stop execution if validation fails
+            }
+
+            // Validate seed format (alphanumeric and hyphens only)
+            const seedRegex = /^[a-zA-Z0-9-]+$/;
+            if (!seedRegex.test(serverSeed)) {
+                chanceAOutput.textContent = 'Player A Chance: Server Seed must be alphanumeric or hyphens only.';
+                chanceBOutput.textContent = 'Player B Chance: Invalid Server Seed.';
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+            if (!seedRegex.test(clientSeed)) {
+                chanceAOutput.textContent = 'Player A Chance: Client Seed must be alphanumeric or hyphens only.';
+                chanceBOutput.textContent = 'Player B Chance: Invalid Client Seed.';
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            // Validate seed length
+            if (serverSeed.length < 32 || serverSeed.length > 64) {
+                chanceAOutput.textContent = 'Player A Chance: Server Seed must be 32-64 characters.';
+                chanceBOutput.textContent = 'Player B Chance: Invalid Server Seed length.';
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+            if (clientSeed.length < 8 || clientSeed.length > 32) {
+                chanceAOutput.textContent = 'Player A Chance: Client Seed must be 8-32 characters.';
+                chanceBOutput.textContent = 'Player B Chance: Invalid Client Seed length.';
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            // Validate bet amounts
+            if (playerA < 0 || playerB < 0) {
+                chanceAOutput.textContent = 'Player A Chance: Bet amounts cannot be negative.';
+                chanceBOutput.textContent = 'Player B Chance: Bet amounts cannot be negative.';
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            if (playerA === 0 && playerB === 0) {
+                chanceAOutput.textContent = 'Player A Chance: At least one bet must be greater than 0.';
+                chanceBOutput.textContent = 'Player B Chance: At least one bet must be greater than 0.';
+                loadingSpinner.classList.add('hidden');
+                return;
+            }
+
+
+            setTimeout(() => { // Simulate loading time
+                const total = playerA + playerB;
+                let chanceA = (playerA / total) * 100;
+                let chanceB = (playerB / total) * 100;
+
+                if (playerA === 0 && playerB > 0) {
+                    chanceA = 0;
+                    chanceB = 100;
+                } else if (playerB === 0 && playerA > 0) {
+                    chanceA = 100;
+                    chanceB = 0;
+                } else if (playerA === 0 && playerB === 0) {
+                    chanceA = 50;
+                    chanceB = 50;
+                }
+
+                // The winner calculation logic is still present in the script for completeness
+                // but its output is no longer displayed on the page.
+                const derivedRand = generateDeterministicRandom(serverSeed, clientSeed);
+                let winnerText = '';
+                if (derivedRand < chanceA) {
+                    winnerText = 'Player A wins!';
+                } else {
+                    winnerText = 'Player B wins!';
+                }
+
+
+                chanceAOutput.textContent = `Player A Chance: ${chanceA.toFixed(2)}%`;
+                chanceBOutput.textContent = `Player B Chance: ${chanceB.toFixed(2)}%`;
+                loadingSpinner.classList.add('hidden'); // Hide spinner after calculation
+            }, 1000); // 1 second delay for spinner
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', fetchWalletBalance);
+        calculateButton.addEventListener('click', calculateFairness);
+
+        // Setup dropdowns when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            setupDropdown('sortDropdownButton', 'sortDropdownOptions', 'sort');
+            setupDropdown('gameDropdownButton', 'gameDropdownOptions', 'game');
+        });
+
+        // Initial state: ensure chances are blank on load
+        document.addEventListener('DOMContentLoaded', () => {
+            chanceAOutput.textContent = '';
+            chanceBOutput.textContent = '';
+        });
+
+
+        // Show chat rules modal
+        chatOptionsButton.addEventListener('click', () => {
+            chatRulesModal.classList.remove('hidden');
+        });
+
+        // Hide chat rules modal
+        understandButton.addEventListener('click', () => {
+            chatRulesModal.classList.add('hidden');
+        });
+
+        // Send message on Enter key press
+        chatInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                console.log('Message sent:', chatInput.value);
+                chatInput.value = '';
+            }
+        });
+
+        // Send message on send button click
+        sendIconContainer.addEventListener('click', () => {
+            console.log('Message sent:', chatInput.value);
+            chatInput.value = '';
+        });
+
+        // Show script modal
+        showScriptButton.addEventListener('click', () => {
+            scriptModal.classList.remove('hidden');
+        });
+
+        // Hide script modal
+        closeScriptModalButton.addEventListener('click', () => {
+            scriptModal.classList.add('hidden');
+        });
+
+        // Leaderboard functionality
+        function renderLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = ''; // Clear existing content
+
+            leaderboardData.forEach(player => {
+                const row = document.createElement('div');
+                row.className = 'leaderboard-row';
+
+                // Determine profit class for styling (negative profit in red)
+                const profitClass = player.profit.includes('-') ? 'negative' : '';
+
+                // Determine color for rank and avatar border
+                const rankColorClass = (player.rank % 2 === 1) ? 'rank-blue' : 'rank-pink';
+                const avatarBorderClass = (player.rank % 2 === 1) ? 'border-blue' : 'border-pink';
+
+                row.innerHTML = `
+                    <div class="leaderboard-rank ${rankColorClass}">${player.rank === 1 ? '&#x2605;' : `#${player.rank}`}</div>
+                    <div class="leaderboard-user">
+                        <img src="${player.avatar}" alt="${player.user}'s Avatar" class="${avatarBorderClass}" onerror="this.onerror=null;this.src='https://placehold.co/48x48/8A8D99/FFFFFF?text=AV';" />
+                        <span class="text-off-white font-semibold">${player.user}</span>
+                    </div>
+                    <div class="leaderboard-wager">
+                        <i class="fas fa-coins"></i><span class="ml-2">${player.wager}</span>
+                    </div>
+                    <div class="leaderboard-profit ${profitClass}">
+                        <i class="fas fa-coins"></i><span class="ml-2">${player.profit}</span>
+                    </div>
+                `;
+                leaderboardList.appendChild(row);
+            });
+        }
+
+        // Wallet functions
+        // Function to calculate and display total value of currently filtered items
+        function updateCurrentFilteredValueDisplay() {
+            const totalValue = currentFilteredItems.reduce((sum, item) => sum + item.largeValue, 0);
+            document.getElementById('currentFilteredValueDisplay').textContent = `$${totalValue.toLocaleString()}`;
+        }
+
+        // Function to render items in the grid
+        function renderItems(items) {
+            const itemsGrid = document.getElementById('itemsGrid');
+            itemsGrid.innerHTML = ''; // Clear existing items
+
+            if (items.length === 0) {
+                itemsGrid.innerHTML = `
+                    <div class="no-items-container col-span-full">
+                        <p class="text-steel-mist text-lg mb-6">No items found in your inventory.</p>
+                        <button class="deposit-button-large" onclick="alert('Deposit functionality would be implemented here!')">
+                            Deposit
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-grid-item';
+                itemDiv.dataset.value = item.largeValue; // Store value for selection
+                itemDiv.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null;this.src='https://placehold.co/80x80/8A8D99/FFFFFF?text=Error';" />
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-value"><i class="fas fa-gem"></i>${item.gemValue}</span>
+                    <div class="large-value">${item.largeValue.toLocaleString()}</div>
+                `;
+                itemsGrid.appendChild(itemDiv);
+            });
+            updateSelectAllButtonText(); // Update select all button state after rendering
+            updateCurrentFilteredValueDisplay(); // Update the value bar after rendering
+        }
+
+        // Function to filter and sort items
+        function filterAndSortItems() {
+            let filteredItems = [...allWalletItems];
+
+            // Apply search filter
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filteredItems = filteredItems.filter(item =>
+                    item.name.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply game filter
+            if (currentGameFilter !== 'all-games') {
+                filteredItems = filteredItems.filter(item => 
+                    item.game === 'BSGI' || item.game === 'All Games'
+                );
+            }
+
+            // Apply sort order
+            if (currentSortOrder === 'highest-lowest') {
+                filteredItems.sort((a, b) => b.largeValue - a.largeValue);
+            } else if (currentSortOrder === 'lowest-highest') {
+                filteredItems.sort((a, b) => a.largeValue - b.largeValue);
+            }
+
+            currentFilteredItems = filteredItems; // Update the global filtered items
+            renderItems(currentFilteredItems);
+        }
+
+        // Function to update the "Select all" button text
+        function updateSelectAllButtonText() {
+            const allItems = document.getElementById('itemsGrid').querySelectorAll('.item-grid-item');
+            const selectedItems = document.getElementById('itemsGrid').querySelectorAll('.item-grid-item.selected');
+            const selectAllButton = document.getElementById('selectAllButton');
+
+            if (selectedItems.length === allItems.length && allItems.length > 0) {
+                selectAllButton.textContent = 'Deselect all';
+            } else {
+                selectAllButton.textContent = 'Select all';
+            }
+        }
+
+        // Function to update the withdraw button value
+        function updateWithdrawValue() {
+            const selectedItems = document.getElementById('itemsGrid').querySelectorAll('.item-grid-item.selected');
+            let totalWithdrawValue = 0;
+            selectedItems.forEach(item => {
+                totalWithdrawValue += parseInt(item.dataset.value);
+            });
+            document.getElementById('withdrawButton').textContent = `Withdraw B$${totalWithdrawValue.toLocaleString()}`;
+        }
+
+        // Dropdown functionality
+        let dropdownsInitialized = false;
+        
+        function setupDropdown(buttonId, optionsId, type) {
+            const button = document.getElementById(buttonId);
+            const options = document.getElementById(optionsId);
+
+            if (!button || !options) return; // Safety check
+
+            // Only add event listeners if not already added
+            if (!button.hasAttribute('data-dropdown-setup')) {
+                button.setAttribute('data-dropdown-setup', 'true');
+                
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent click from closing other dropdowns
+                    // Close other dropdowns
+                    document.querySelectorAll('.dropdown-options').forEach(otherOptions => {
+                        if (otherOptions.id !== optionsId) {
+                            otherOptions.classList.add('hidden');
+                        }
+                    });
+                    options.classList.toggle('hidden');
+                });
+
+                options.querySelectorAll('div').forEach(option => {
+                    option.addEventListener('click', () => {
+                        button.childNodes[0].nodeValue = option.textContent + ' '; // Update button text
+                        options.classList.add('hidden');
+                        if (type === 'sort') {
+                            currentSortOrder = option.dataset.value;
+                        } else if (type === 'game') {
+                            currentGameFilter = option.dataset.value;
+                        }
+                        filterAndSortItems(); // Re-filter and re-sort
+                    });
+                });
+
+                // Close dropdown if clicked outside
+                document.addEventListener('click', (event) => {
+                    if (!button.contains(event.target) && !options.contains(event.target)) {
+                        options.classList.add('hidden');
+                    }
+                });
+            }
+        }
+
+        // Leaderboard Modal Event Listeners - wrapped in DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show leaderboard modal
+            leaderboardButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                renderLeaderboard();
+                leaderboardModal.classList.remove('hidden');
+            });
+
+            // Hide leaderboard modal
+            closeLeaderboardModal.addEventListener('click', () => {
+                leaderboardModal.classList.add('hidden');
+            });
+
+            // Hide leaderboard modal when clicking outside
+            leaderboardModal.addEventListener('click', (event) => {
+                if (event.target === leaderboardModal) {
+                    leaderboardModal.classList.add('hidden');
+                }
+            });
+        });
+
+        // Confirmation Modal Functionality
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeConfirmationModal = document.getElementById('closeConfirmationModal');
+        const confirmActionButton = document.getElementById('confirmActionButton');
+        const cancelActionButton = document.getElementById('cancelActionButton');
+        const confirmationModalIcon = document.getElementById('confirmationModalIcon');
+        const confirmationModalTitle = document.getElementById('confirmationModalTitle');
+        const confirmationModalMessage = document.getElementById('confirmationModalMessage');
+
+        // Store the current action to be confirmed
+        let currentConfirmationAction = null;
+
+        // Function to show confirmation modal
+        function showConfirmationModal(config) {
+            confirmationModalIcon.className = `fas ${config.icon} confirmation-modal-icon`;
+            confirmationModalTitle.textContent = config.title;
+            confirmationModalMessage.textContent = config.message;
+            confirmActionButton.textContent = config.confirmText;
+            currentConfirmationAction = config.action;
+            confirmationModal.classList.remove('hidden');
+        }
+
+        // Hide the modal when the close icon is clicked
+        closeConfirmationModal.addEventListener('click', () => {
+            confirmationModal.classList.add('hidden');
+            currentConfirmationAction = null;
+        });
+
+        // Hide the modal when the cancel button is clicked
+        cancelActionButton.addEventListener('click', () => {
+            confirmationModal.classList.add('hidden');
+            currentConfirmationAction = null;
+        });
+
+        // Handle the confirmation action
+        confirmActionButton.addEventListener('click', () => {
+            if (currentConfirmationAction) {
+                currentConfirmationAction();
+            }
+            confirmationModal.classList.add('hidden');
+            currentConfirmationAction = null;
+        });
+
+        // Hide modal if clicked outside (on the overlay)
+        confirmationModal.addEventListener('click', (event) => {
+            if (event.target === confirmationModal) {
+                confirmationModal.classList.add('hidden');
+                currentConfirmationAction = null;
+            }
+        });
+
+        // Logout Button Confirmation
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                showConfirmationModal({
+                    icon: 'fa-sign-out-alt',
+                    title: 'Log out of your account?',
+                    message: "Are you sure you want to log out? You'll need to log in again to access your account.",
+                    confirmText: 'Yes, log out',
+                    action: () => {
+                        console.log('User logged out');
+                        // Add actual logout logic here
+                        alert('Logged out successfully!');
+                    }
+                });
+            });
+        }
+
+        // Login Button - Redirect to login page
+        const loginButton = document.getElementById('loginButton');
+        if (loginButton) {
+            loginButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'login.html';
+            });
+        }
+
+        // Calculate Fairness Button Confirmation
+        const originalCalculateFunction = calculateFairness; // Store the original function
+
+        // Replace the existing event listener
+        calculateButton.removeEventListener('click', originalCalculateFunction);
+        calculateButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showConfirmationModal({
+                icon: 'fa-calculator',
+                title: 'Calculate Fairness?',
+                message: 'This will process your seeds and bet amounts to calculate the fairness percentages. Make sure all values are correct.',
+                confirmText: 'Yes, calculate',
+                action: () => {
+                    originalCalculateFunction(); // Call the original calculation function
+                }
+            });
+        });
+
+        // Show Script Button Confirmation
+        const originalShowScriptFunction = () => {
+            scriptModal.classList.remove('hidden');
+        };
+
+        showScriptButton.removeEventListener('click', originalShowScriptFunction);
+        showScriptButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showConfirmationModal({
+                icon: 'fa-code',
+                title: 'View Calculation Script?',
+                message: 'This will show you the actual code used for fairness calculations. This contains technical implementation details.',
+                confirmText: 'Yes, show script',
+                action: originalShowScriptFunction
+            });
+        });
+
+        // Wallet Modal Functionality
+        const walletSearchInput = document.getElementById('searchInput');
+        const walletSortDropdown = document.getElementById('sortDropdownButton');
+        const walletGameFilter = document.getElementById('gameDropdownButton');
+
+        // Show wallet modal
+        walletButton.addEventListener('click', () => {
+            walletModal.classList.remove('hidden');
+            filterAndSortItems(); // Initial render with filters/sort
+            updateCurrentFilteredValueDisplay(); // Display initial total filtered value
+
+            // Setup dropdowns if not already done
+            if (!dropdownsInitialized) {
+                setupDropdown('sortDropdownButton', 'sortDropdownOptions', 'sort');
+                setupDropdown('gameDropdownButton', 'gameDropdownOptions', 'game');
+                dropdownsInitialized = true;
+            }
+
+            // Search input event listener (only add if not already added)
+            const searchInput = document.getElementById('searchInput');
+            if (!searchInput.hasAttribute('data-search-setup')) {
+                searchInput.setAttribute('data-search-setup', 'true');
+                searchInput.addEventListener('input', filterAndSortItems);
+            }
+
+            // Select All functionality (only add if not already added)
+            const selectAllButton = document.getElementById('selectAllButton');
+            if (!selectAllButton.hasAttribute('data-select-setup')) {
+                selectAllButton.setAttribute('data-select-setup', 'true');
+                
+                selectAllButton.addEventListener('click', () => {
+                    const itemsGrid = document.getElementById('itemsGrid');
+                    const allItems = itemsGrid.querySelectorAll('.item-grid-item');
+                    let allSelected = true;
+
+                    // Check if all *displayed* items are already selected
+                    allItems.forEach(item => {
+                        if (!item.classList.contains('selected')) {
+                            allSelected = false;
+                        }
+                    });
+
+                    if (allSelected) {
+                        // If all are selected, deselect all
+                        allItems.forEach(item => {
+                            item.classList.remove('selected');
+                        });
+                    } else {
+                        // If not all are selected, select all
+                        allItems.forEach(item => {
+                            item.classList.add('selected');
+                        });
+                    }
+                    updateSelectAllButtonText();
+                    updateWithdrawValue();
+                });
+            }
+
+            // Individual item selection (use event delegation)
+            const itemsGrid = document.getElementById('itemsGrid');
+            if (!itemsGrid.hasAttribute('data-items-setup')) {
+                itemsGrid.setAttribute('data-items-setup', 'true');
+                
+                itemsGrid.addEventListener('click', (event) => {
+                    const item = event.target.closest('.item-grid-item');
+                    if (item) {
+                        item.classList.toggle('selected');
+                        updateSelectAllButtonText();
+                        updateWithdrawValue();
+                    }
+                });
+            }
+
+            // Deposit button functionality (only add if not already added)
+            const depositButton = document.getElementById('depositButton');
+            if (!depositButton.hasAttribute('data-deposit-setup')) {
+                depositButton.setAttribute('data-deposit-setup', 'true');
+                
+                depositButton.addEventListener('click', () => {
+                    walletModal.classList.add('hidden');
+                    depositModal.classList.remove('hidden');
+                });
+            }
+        });
+
+        // Hide wallet modal
+        closeWalletModal.addEventListener('click', () => {
+            walletModal.classList.add('hidden');
+        });
+
+        // Hide wallet modal when clicking outside
+        walletModal.addEventListener('click', (event) => {
+            if (event.target === walletModal) {
+                walletModal.classList.add('hidden');
+            }
+        });
+
+        // Deposit Modal Functionality
+        // Hide deposit modal
+        closeDepositModal.addEventListener('click', () => {
+            depositModal.classList.add('hidden');
+        });
+
+        // Hide deposit modal when clicking outside
+        depositModal.addEventListener('click', (event) => {
+            if (event.target === depositModal) {
+                depositModal.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+        import { getDatabase, ref, push, set, onValue, query, limitToLast, orderByChild } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-12345678901234567890",
+            authDomain: "bloxyx-12345.firebaseapp.com",
+            databaseURL: "https://bloxyx-12345-default-rtdb.firebaseio.com",
+            projectId: "bloxyx-12345",
+            storageBucket: "bloxyx-12345.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef",
+            measurementId: "G-ABCDEFGHIJ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+        const auth = getAuth();
+
+        // Chat variables
+        const chatContainer = document.querySelector('.chat-scroll-area .space-y-4');
+        const chatInput = document.getElementById('chatInput');
+        const onlineUserCount = document.querySelector('.online-users-pulse + span');
+        let currentUser = null;
+        
+        // Sign in anonymously for chat functionality
+        signInAnonymously(auth)
+            .then(() => {
+                console.log("Signed in anonymously");
+            })
+            .catch((error) => {
+                console.error("Anonymous sign-in error:", error);
+            });
+            
+        // Listen for auth state changes
+        onAuthStateChanged(auth, (user) => {
+            const chatInputContainer = chatInput.parentElement;
+            
+            if (user) {
+                currentUser = user;
+                chatInput.placeholder = "Type a message...";
+                // Enable chat input
+                chatInput.disabled = false;
+                chatInput.readOnly = false;
+                
+                // Remove locked styling
+                chatInputContainer.classList.remove('chat-input-locked');
+                
+                // Remove redirect events if user is logged in
+                chatInput.removeEventListener('click', redirectToLogin);
+                chatInput.removeEventListener('focus', redirectToLogin);
+                chatInput.removeEventListener('keydown', redirectToLogin);
+            } else {
+                currentUser = null;
+                chatInput.placeholder = "Login to chat";
+                // Disable chat input but keep it focusable for redirection
+                chatInput.disabled = false;
+                chatInput.readOnly = true;
+                
+                // Add locked styling
+                chatInputContainer.classList.add('chat-input-locked');
+                
+                // Add redirect events if user is not logged in
+                chatInput.addEventListener('click', redirectToLogin);
+                chatInput.addEventListener('focus', redirectToLogin);
+                chatInput.addEventListener('keydown', redirectToLogin);
+                
+                // Force redirect if not logged in and already on page
+                if (document.activeElement === chatInput) {
+                    redirectToLogin();
+                }
+            }
+        });
+        
+        // Function to redirect to login page
+        function redirectToLogin() {
+            window.location.href = 'login.html';
+        }
+        
+        // Add initial click and focus listeners for chat input that redirect to login
+        chatInput.addEventListener('click', redirectToLogin);
+        chatInput.addEventListener('focus', redirectToLogin);
+        chatInput.addEventListener('keydown', redirectToLogin);
+        
+        // Function to send a message
+        function sendMessage(text) {
+            if (!currentUser || !text.trim()) return;
+            
+            const chatRef = ref(database, 'chat');
+            const newMessageRef = push(chatRef);
+            
+            const message = {
+                uid: currentUser.uid,
+                username: generateUsername(), // Generate a random username for anonymous users
+                text: text.trim(),
+                timestamp: Date.now(),
+                avatarColor: getRandomColor()
+            };
+            
+            set(newMessageRef, message);
+        }
+        
+        // Function to generate a random username
+        function generateUsername() {
+            // If you have a real username system, use that instead
+            const adjectives = ['Happy', 'Lucky', 'Sunny', 'Clever', 'Swift', 'Brave', 'Bright'];
+            const nouns = ['Player', 'Gamer', 'Winner', 'Warrior', 'Ninja', 'Wizard'];
+            
+            const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            const number = Math.floor(Math.random() * 1000);
+            
+            return `${adjective}${noun}${number}`;
+        }
+        
+        // Function to get a random color for avatars
+        function getRandomColor() {
+            const colors = ['#3C60FF', '#C040FF', '#E060FF', '#6A8FFF']; // Your site's colors
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        // Function to format timestamp
+        function formatTimestamp(timestamp) {
+            const now = new Date();
+            const messageTime = new Date(timestamp);
+            
+            const diffInMinutes = Math.floor((now - messageTime) / (1000 * 60));
+            
+            if (diffInMinutes < 1) return 'just now';
+            if (diffInMinutes === 1) return '1 min ago';
+            if (diffInMinutes < 60) return `${diffInMinutes} mins ago`;
+            
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours === 1) return '1 hour ago';
+            if (diffInHours < 24) return `${diffInHours} hours ago`;
+            
+            const diffInDays = Math.floor(diffInHours / 24);
+            if (diffInDays === 1) return 'yesterday';
+            return `${diffInDays} days ago`;
+        }
+        
+        // Function to create a chat message element
+        function createChatMessageElement(message) {
+            const messageCard = document.createElement('div');
+            messageCard.className = 'chat-message-card';
+            
+            // Generate initial for avatar
+            const initial = message.username.charAt(0).toUpperCase();
+            
+            messageCard.innerHTML = `
+                <div class="flex flex-col min-w-0">
+                    <div class="flex items-center min-w-0">
+                        <span class="relative flex-shrink-0 mr-2">
+                            <div class="rounded-lg border-2 chat-avatar flex items-center justify-center" 
+                                style="background-color: ${message.avatarColor}; width: 40px; height: 40px; color: white; font-weight: bold; font-size: 20px;">
+                                ${initial}
+                            </div>
+                        </span>
+                        <span class="font-semibold text-sky-pulse text-base">@${message.username}</span>
+                    </div>
+                    <p class="text-steel-mist text-base mt-1 font-medium break-words">${escapeHTML(message.text)}</p>
+                </div>
+                <span class="text-steel-mist text-sm absolute top-3 right-4">${formatTimestamp(message.timestamp)}</span>
+            `;
+            
+            return messageCard;
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Listen for chat messages
+        const chatRef = query(ref(database, 'chat'), orderByChild('timestamp'), limitToLast(50));
+        onValue(chatRef, (snapshot) => {
+            // Clear existing messages
+            chatContainer.innerHTML = '';
+            
+            // Add new messages
+            const messages = [];
+            snapshot.forEach((childSnapshot) => {
+                messages.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val()
+                });
+            });
+            
+            // Sort messages by timestamp (newest first since we're using flex-col-reverse)
+            messages.sort((a, b) => b.timestamp - a.timestamp);
+            
+            // Add messages to the chat (flex-col-reverse will display them in correct order)
+            messages.forEach(message => {
+                chatContainer.appendChild(createChatMessageElement(message));
+            });
+            
+            // No need to manually scroll since flex-col-reverse handles this
+            // The newest messages will always appear at the top of the scroll area
+        });
+        
+        // Track online users
+        const connectedRef = ref(database, '.info/connected');
+        onValue(connectedRef, (snap) => {
+            if (snap.val() === true) {
+                // User is connected
+                const userStatusRef = ref(database, 'presence/' + auth.currentUser.uid);
+                
+                // Add this device to user's connections
+                const onDisconnectRef = ref(database, 'presence/' + auth.currentUser.uid);
+                // Remove user when disconnected
+                onValue(onDisconnectRef, () => {
+                    set(userStatusRef, true);
+                    set(ref(database, 'presence/' + auth.currentUser.uid), null);
+                });
+            }
+        });
+        
+        // Update online user count
+        const presenceRef = ref(database, 'presence');
+        onValue(presenceRef, (snapshot) => {
+            const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+            onlineUserCount.textContent = count.toString();
+        });
+        
+        // Listen for Enter key in chat input
+        chatInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                if (!currentUser) {
+                    // Redirect to login if not logged in
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                const message = chatInput.value.trim();
+                if (message) {
+                    sendMessage(message);
+                    chatInput.value = ''; // Clear input after sending
+                }
+            }
+        });
+        
+        // Send message on send button click
+        const sendIconContainer = document.querySelector('.send-icon-container') || document.getElementById('sendIconContainer');
+        if (sendIconContainer) {
+            sendIconContainer.addEventListener('click', () => {
+                if (!currentUser) {
+                    // Redirect to login if not logged in
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                const message = chatInput.value.trim();
+                if (message) {
+                    sendMessage(message);
+                    chatInput.value = ''; // Clear input after sending
+                }
+            });
+        }
+    </script>
+</body>
+</html>

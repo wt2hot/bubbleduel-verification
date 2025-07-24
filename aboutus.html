@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloxyX - About Us</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Custom Tailwind CSS configuration to extend default colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blackest-night': '#0D0D10',
+                        'eclipse': '#15161B',
+                        'off-white': '#F1F1F1',
+                        'steel-mist': '#8A8D99',
+                        'sky-pulse': '#3C60FF',
+                        'cyber-candy': '#C040FF',
+                        'neon-aura': '#6A8FFF',
+                        'pulse-pink': '#E060FF',
+                        'border-dark': '#0A0A0C',
+                        'chat-card-bg': '#0D0E13',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .leaderboard-card {
+            background: linear-gradient(135deg, #0F0F13 0%, #15161B 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(58, 63, 76, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            background-color: #15161B; /* eclipse */
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid #3C60FF; /* sky-pulse border */
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-header {
+            background: linear-gradient(135deg, #3C60FF 0%, #C040FF 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(60, 96, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .leaderboard-table-header {
+            display: flex;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #2D2D44;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #8A8D99;
+            font-size: 1.1rem;
+        }
+
+        .leaderboard-table-header .leaderboard-rank {
+            width: 15%;
+            text-align: left;
+            padding-left: 1rem;
+        }
+
+        .leaderboard-table-header .leaderboard-user {
+            width: 40%;
+            text-align: left;
+        }
+
+        .leaderboard-table-header .leaderboard-wager,
+        .leaderboard-table-header .leaderboard-profit {
+            width: 22.5%;
+            text-align: left;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(138, 141, 153, 0.1);
+        }
+
+        .leaderboard-row:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            width: 15%;
+            font-weight: bold;
+            text-align: left;
+            font-size: 1.2rem;
+            padding-left: 1rem;
+        }
+
+        .rank-blue {
+            color: #3C60FF;
+        }
+
+        .rank-pink {
+            color: #C040FF;
+        }
+
+        .border-blue {
+            border: 2px solid #3C60FF;
+        }
+
+        .border-pink {
+            border: 2px solid #C040FF;
+        }
+
+        .leaderboard-user {
+            width: 40%;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .leaderboard-user img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .leaderboard-wager,
+        .leaderboard-profit {
+            width: 22.5%;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-weight: 500;
+            font-size: 1.1rem;
+            color: #F1F1F1;
+        }
+
+        .leaderboard-profit.negative {
+            color: #FF4040;
+        }
+
+        .leaderboard-wager i,
+        .leaderboard-profit i {
+            margin-right: 0.5rem;
+            color: #8A8D99;
+        }
+        
+        .leaderboard-entry:nth-child(odd) {
+            background: linear-gradient(135deg, rgba(60, 96, 255, 0.1) 0%, rgba(106, 143, 255, 0.05) 100%);
+        }
+        
+        .leaderboard-entry:nth-child(even) {
+            background: linear-gradient(135deg, rgba(192, 64, 255, 0.1) 0%, rgba(224, 96, 255, 0.05) 100%);
+        }
+        
+        .rank-number {
+            background: linear-gradient(135deg, #3C60FF 0%, #C040FF 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+        }
+        
+        .coin-amount {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .close-button {
+            transition: all 0.3s ease;
+        }
+        
+        .close-button:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+            transform: scale(1.1);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Define CSS variables for colors to be used in animations */
+        :root {
+            --sky-pulse-color: #3C60FF;
+            --cyber-candy-color: #C040FF;
+        }
+
+        /* Custom scrollbar for the chat */
+        .chat-scroll-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-scroll-area::-webkit-scrollbar-track {
+            background: #08080E; /* Blackest Night for the track */
+            border-radius: 10px;
+        }
+
+        .chat-scroll-area::-webkit-scrollbar-thumb {
+            background: #101116; /* Eclipse for the thumb */
+            border-radius: 10px;
+        }
+
+        .chat-scroll-area::-webkit-scrollbar-thumb:hover {
+            background: #333333; /* Slightly lighter grey on hover */
+        }
+
+        /* Inter font from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0D0D10;
+        }
+
+        /* Custom styling for chat messages to act as cards */
+        .chat-message-card {
+            background-color: #0D0E13; /* Using the new chat-card-bg color */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 0.75rem 1rem; /* Adjusted padding for chat messages */
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            border: 1px solid rgba(138, 141, 153, 0.2); /* steel-mist with opacity for stroke */
+            position: relative; /* Needed for absolute positioning of timestamp */
+        }
+
+        /* Fixed size for chat avatars */
+        .chat-avatar {
+            width: 40px; /* Set a fixed width */
+            height: 40px; /* Set a fixed height */
+            object-fit: cover; /* Ensures the image covers the area without distortion */
+        }
+
+        /* Pulsing animation for online users indicator */
+        @keyframes pulse-animation {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        .online-users-pulse {
+            animation: pulse-animation 1.5s infinite ease-in-out;
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #101116; /* Eclipse */
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid #3C60FF; /* Sky Pulse border */
+        }
+
+        /* Confirmation modal specific styles */
+        .confirmation-modal-content {
+            background-color: #1A1A2E; /* Darker background for the modal */
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            border: 1px solid #3C60FF; /* Sky Pulse border */
+        }
+        .confirmation-modal-icon {
+            color: #3C60FF; /* Sky Pulse color for the icon */
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        .confirmation-modal-title {
+            color: #F1F1F1; /* Off-white for title */
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .confirmation-modal-message {
+            color: #8A8D99; /* Steel mist for message */
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+        .confirmation-modal-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .confirmation-modal-button.primary {
+            background-color: #6A8FFF; /* Neon Aura for primary button */
+            color: #F1F1F1;
+        }
+        .confirmation-modal-button.primary:hover {
+            background-color: #3C60FF; /* Darker Sky Pulse on hover */
+        }
+        .confirmation-modal-button.secondary {
+            background-color: #2D2D44; /* A slightly lighter dark for secondary button */
+            color: #F1F1F1;
+            border: 1px solid #8A8D99;
+        }
+        .confirmation-modal-button.secondary:hover {
+            background-color: #3A3A55; /* Even lighter dark on hover */
+        }
+        .confirmation-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: #8A8D99;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Styles for the FAQ dropdown */
+        .faq-item {
+            background-color: #15161B; /* eclipse */
+            border: 1px solid #0A0A0C; /* border-dark */
+            border-radius: 0.75rem; /* rounded-xl */
+            overflow: hidden; /* Hide overflowing content when answer is closed */
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem; /* py-5 px-6 */
+            cursor: pointer;
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            color: #F1F1F1; /* off-white */
+            transition: background-color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background-color: #1A1B20; /* Slightly darker on hover */
+        }
+
+        .faq-question i {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem; /* px-6 */
+            max-height: 0; /* Hidden by default */
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out; /* Smooth transition */
+            color: #8A8D99; /* steel-mist */
+            font-size: 1rem; /* text-base */
+            line-height: 1.6;
+        }
+
+        .faq-answer.active {
+            max-height: 500px; /* Arbitrary large value to show content */
+            padding-bottom: 1.25rem; /* pb-5 */
+        }
+
+        /* Wallet Modal Styles */
+        .wallet-card {
+            background-color: #15161B; /* eclipse */
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid #0A0A0C; /* border-dark */
+            padding: 1.5rem; /* Reduced padding */
+            width: 100%;
+            max-width: 600px; /* Smaller max-width for the component */
+            min-height: 500px; /* Adjusted min-height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem; /* Adjusted margin */
+        }
+        .wallet-header h1 {
+            font-size: 2.25rem; /* Adjusted font size */
+        }
+        .wallet-header i {
+            font-size: 1.25rem; /* Adjusted icon size */
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            padding-right: 2.5rem; /* Space for icon */
+        }
+
+        .input-group .icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8A8D99;
+        }
+
+        /* Dropdown specific styles */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-button {
+            background-color: #0D0D10; /* blackest-night */
+            color: #F1F1F1;
+            padding: 0.6rem 1rem; /* Adjusted padding */
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid #2D2D44; /* darker shade for border */
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem; /* Adjusted font size */
+        }
+
+        .dropdown-button:hover {
+            background-color: #1A1B20;
+        }
+
+        .dropdown-options {
+            position: absolute;
+            background-color: #0D0D10; /* blackest-night */
+            border-radius: 0.5rem;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            min-width: 100%;
+            margin-top: 0.5rem;
+            overflow: hidden; /* Ensures rounded corners */
+            border: 1px solid #2D2D44;
+        }
+
+        .dropdown-options div {
+            padding: 0.6rem 1rem; /* Adjusted padding */
+            color: #F1F1F1;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.9rem; /* Adjusted font size */
+        }
+
+        .dropdown-options div:hover {
+            background-color: #1A1B20;
+        }
+
+        .dropdown-options.hidden {
+            display: none;
+        }
+
+        /* Item grid display */
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Smaller responsive grid */
+            gap: 0.75rem; /* Adjusted gap */
+            flex-grow: 1; /* Allow grid to take available space */
+            overflow-y: auto; /* Enable scrolling if many items */
+            padding-right: 0.5rem; /* For scrollbar space */
+            margin-bottom: 1rem; /* Space before action buttons */
+            max-height: 300px; /* Fixed height for scrollable area (adjust as needed) */
+        }
+
+        /* Custom scrollbar for the item grid */
+        .item-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .item-grid::-webkit-scrollbar-track {
+            background: #1A1B20; /* Darker gray for the track */
+            border-radius: 10px;
+        }
+
+        .item-grid::-webkit-scrollbar-thumb {
+            background: #8A8D99; /* Steel mist for the thumb */
+            border-radius: 10px;
+        }
+
+        .item-grid::-webkit-scrollbar-thumb:hover {
+            background: #F1F1F1; /* Off-white on hover */
+        }
+
+        .item-grid-item {
+            background-color: #0D0D10; /* blackest-night */
+            border: 1px solid #2D2D44;
+            border-radius: 0.75rem;
+            padding: 0.75rem; /* Adjusted padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; /* Added border-color transition */
+            position: relative; /* For absolute positioning of the large value */
+            padding-bottom: 3.5rem; /* Make space for the large value at the bottom */
+        }
+
+        .item-grid-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .item-grid-item.selected {
+            border-color: #C040FF; /* Cyber Candy for selected item border */
+            box-shadow: 0px 0px 10px rgba(192, 64, 255, 0.5); /* Glowing effect */
+        }
+
+        .item-grid-item img {
+            width: 70px; /* Smaller image size */
+            height: 70px; /* Smaller image size */
+            object-fit: contain;
+            margin-bottom: 0.4rem; /* Adjusted margin */
+            border-radius: 0.375rem; /* Slightly rounded corners for the image */
+        }
+
+        .item-grid-item .item-name {
+            font-size: 0.8rem; /* Smaller font size */
+            font-weight: 500;
+            color: #F1F1F1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%; /* Ensure text ellipsis works */
+        }
+
+        .item-grid-item .item-value {
+            font-size: 0.75rem; /* Smaller font size */
+            color: #C040FF; /* Cyber Candy for gem value */
+            display: flex;
+            align-items: center;
+            position: absolute; /* Position relative to parent for visibility */
+            top: 10px; /* Adjust as needed to not overlap with image */
+            right: 10px; /* Adjust as needed */
+            background-color: #0D0D10; /* Ensure it's on top of other elements */
+            padding: 0.2em 0.4em;
+            border-radius: 0.3em;
+            z-index: 2; /* Ensure it's above the image if needed */
+        }
+
+        .item-grid-item .item-value i {
+            margin-right: 0.2rem;
+            color: #C040FF; /* Cyber Candy for gem icon */
+        }
+
+        .item-grid-item .large-value {
+            position: absolute;
+            bottom: 0; /* Position at the very bottom */
+            left: 0;
+            right: 0;
+            font-size: 1.25rem; /* Adjusted large font size */
+            font-weight: bold;
+            color: #F1F1F1; /* Off-white color */
+            background-color: #0D0D10; /* blackest-night background for the value area */
+            padding: 0.5rem 0;
+            border-top: 1px solid #2D2D44; /* Separator line */
+            border-bottom-left-radius: 0.75rem; /* Match parent border-radius */
+            border-bottom-right-radius: 0.75rem; /* Match parent border-radius */
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end; /* Align to right */
+            gap: 0.75rem; /* Adjusted gap */
+            margin-top: 1rem; /* Adjusted margin between grid and action buttons */
+            flex-shrink: 0; /* Prevent buttons from shrinking */
+        }
+
+        .action-buttons button {
+            background-color: #0D0D10; /* blackest-night */
+            color: #F1F1F1;
+            padding: 0.6rem 1.2rem; /* Adjusted padding */
+            border-radius: 0.5rem;
+            border: 1px solid #2D2D44;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            font-size: 0.9rem; /* Adjusted font size */
+        }
+
+        .action-buttons button:hover {
+            background-color: #1A1B20;
+        }
+
+        .action-buttons .deposit-button {
+            background-color: #3C60FF; /* sky-pulse */
+            border-color: #3C60FF;
+        }
+        .action-buttons .deposit-button:hover {
+            background-color: #6A8FFF; /* neon-aura */
+        }
+
+        .action-buttons .withdraw-button {
+            background-color: #C040FF; /* cyber-candy */
+            border-color: #C040FF;
+        }
+
+        .action-buttons .withdraw-button:hover {
+            background-color: #E060FF; /* pulse-pink */
+        }
+
+        /* No items message and button container */
+        .no-items-container {
+            text-align: center;
+            padding-top: 50px; /* Adjust as needed */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .no-items-container .deposit-button-large {
+            margin-top: 20px;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background-color: #3C60FF; /* sky-pulse */
+            color: #F1F1F1;
+            transition: background-color 0.3s ease;
+        }
+        .no-items-container .deposit-button-large:hover {
+            background-color: #6A8FFF; /* neon-aura */
+        }
+
+        /* Value bar style */
+        .value-bar {
+            background-color: #0D0D10; /* blackest-night */
+            border-radius: 0.75rem;
+            border: 1px solid #2D2D44;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem; /* Space between value bar and item grid */
+        }
+
+        .value-bar span {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #F1F1F1;
+        }
+
+        .value-bar .value-amount {
+            color: #C040FF; /* Cyber Candy color for the value */
+            margin-left: 0.5rem;
+        }
+
+        /* Deposit Modal Styles */
+        .deposit-modal-container {
+            background-color: #15161B;
+            border-radius: 1rem;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid #0A0A0C;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin: auto;
+        }
+
+        .deposit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .deposit-header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #F1F1F1;
+        }
+        .deposit-header .close-button {
+            font-size: 1.5rem;
+            color: #8A8D99;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            background: none;
+            border: none;
+        }
+        .deposit-header .close-button:hover {
+            color: #F1F1F1;
+        }
+
+        .instructions p {
+            font-size: 1rem;
+            color: #8A8D99;
+            margin-bottom: 1.5rem;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        .instruction-number {
+            background-color: #3C60FF;
+            color: #F1F1F1;
+            width: 28px;
+            height: 28px;
+            border-radius: 9999px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            margin-right: 0.75rem;
+        }
+        .instruction-text {
+            color: #F1F1F1;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .bot-list {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .bot-card {
+            background-color: #1A1B20;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(138, 141, 153, 0.2);
+            transition: border-color 0.2s ease;
+        }
+        .bot-card:hover {
+            border-color: #3C60FF;
+        }
+
+        .bot-info {
+            display: flex;
+            align-items: center;
+        }
+        .bot-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.5rem;
+            margin-right: 1rem;
+        }
+        .bot-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .bot-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #F1F1F1;
+            margin-right: 0.5rem;
+        }
+        .bot-game {
+            font-size: 0.875rem;
+            color: #8A8D99;
+        }
+
+        .bot-status-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .bot-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 9999px;
+            margin-right: 0.25rem;
+        }
+
+        .online-dot {
+            background-color: #22C55E;
+            animation: beep-online 1.5s infinite ease-in-out;
+        }
+
+        .offline-dot {
+            background-color: #EF4444;
+            animation: beep-offline 1.5s infinite ease-in-out;
+        }
+
+        .status-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .online-text {
+            color: #22C55E;
+        }
+
+        .offline-text {
+            color: #EF4444;
+        }
+
+        @keyframes beep-online {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        @keyframes beep-offline {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        .join-button {
+            background-color: #3C60FF;
+            color: #F1F1F1;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .join-button:hover {
+            background-color: #6A8FFF;
+        }
+
+        .security-tip {
+            background-color: rgba(138, 141, 153, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: #8A8D99;
+            border: 1px solid rgba(138, 141, 153, 0.2);
+            margin-top: 1.5rem;
+        }
+
+        .balance-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #0A0A0C;
+        }
+    </style>
+</head>
+<body class="bg-blackest-night text-off-white min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <nav class="bg-eclipse p-4 flex items-center justify-between shadow-xl rounded-b-xl mx-4 mt-4 border-b border-border-dark">
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-3">
+                <img src="https://placehold.co/48x48/C040FF/FFFFFF?text=BX" alt="BloxyX Logo" class="rounded-full shadow-lg border-2 border-cyber-candy">
+                <span class="text-4xl font-extrabold text-cyber-candy tracking-wider">BloxyX</span>
+            </div>
+            <a href="bubble.html" class="text-steel-mist hover:text-cyber-candy px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 text-xl font-semibold">
+                <i class="fas fa-home text-2xl"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" id="leaderboardButton" class="text-steel-mist hover:text-sky-pulse px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 text-xl font-semibold">
+                <i class="fas fa-trophy text-2xl"></i>
+                <span>Leaderboard</span>
+            </a>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button id="walletButton" class="bg-eclipse text-steel-mist px-7 py-3 rounded-full hover:bg-border-dark transition-colors duration-300 flex items-center space-x-2 shadow-lg transform hover:scale-105 border border-border-dark">
+                <i class="fas fa-wallet text-sky-pulse text-xl"></i>
+                <span id="walletBalance" class="font-bold text-xl">Loading...</span>
+            </button>
+            <button class="bg-cyber-candy text-off-white px-7 py-3 rounded-full hover:bg-pulse-pink transition-colors duration-300 flex items-center space-x-2 shadow-lg transform hover:scale-105" id="loginButton">
+                <i class="fas fa-sign-in-alt text-xl"></i>
+                <span class="font-bold text-xl">Login</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="flex flex-grow mt-6 mx-4">
+        <!-- Left Sidebar (Config & Jackpot) -->
+        <aside class="w-[10%] bg-eclipse p-6 rounded-xl shadow-xl mr-6 flex flex-col justify-between items-center border border-border-dark">
+            <div>
+                <div class="flex flex-col items-center space-y-10">
+                    <a href="coinflip.html" class="flex flex-col items-center space-y-2 cursor-pointer transition-all duration-200 group active:scale-105" style="text-decoration: none;">
+                        <i class="fas fa-dice text-steel-mist text-4xl group-hover:text-sky-pulse"></i>
+                        <span class="text-steel-mist text-base font-semibold group-hover:text-sky-pulse">Games</span>
+                    </a>
+                    <a href="aboutus.html" class="flex flex-col items-center space-y-2 cursor-pointer transition-all duration-200 group active:scale-105" style="text-decoration: none;">
+                        <i class="fas fa-info-circle text-steel-mist text-4xl group-hover:text-sky-pulse"></i>
+                        <span class="text-steel-mist text-base font-semibold group-hover:text-sky-pulse">About</span>
+                    </a>
+                    <a href="#logout" id="logoutButton" class="flex flex-col items-center space-y-2 cursor-pointer transition-all duration-200 group active:scale-105" style="text-decoration: none;">
+                        <i class="fas fa-sign-out-alt text-steel-mist text-4xl group-hover:text-sky-pulse"></i>
+                        <span class="text-steel-mist text-base font-semibold group-hover:text-sky-pulse">Logout</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Socials and Terms of Service (Moved to the very bottom and realigned) -->
+            <div class="pt-6 border-t border-border-dark w-full flex flex-col items-center space-y-6">
+                <div class="flex justify-center w-full"> <!-- Centered Discord icon -->
+                    <a href="https://discord.gg/e25gcs9yjX" target="_blank" rel="noopener noreferrer" class="text-steel-mist hover:text-sky-pulse transition-colors duration-200 text-4xl">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                </div>
+                <a href="terms.html" class="text-steel-mist hover:text-off-white transition-colors duration-200 text-base font-semibold px-5 py-3 rounded-lg border border-border-dark hover:border-steel-mist">
+                    Terms of Service
+                </a>
+                <div class="flex justify-center w-full"> <!-- Container for the calculator icon -->
+                    <a href="fairness.html" class="text-steel-mist hover:text-sky-pulse transition-colors duration-200 text-4xl text-center">
+                        <i class="fas fa-calculator"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Central Content Area for About Us -->
+        <main class="flex-grow bg-eclipse p-8 rounded-xl shadow-xl border border-border-dark overflow-y-auto">
+            <h1 class="text-5xl font-extrabold text-off-white mb-8 text-center">About Us</h1>
+
+            <!-- About Us Section -->
+            <section class="mb-12">
+                <p class="text-lg text-steel-mist leading-relaxed mb-4">
+                    Welcome to BubbleDuel, a Roblox-based skill and luck platform designed for players who enjoy competitive trading games. Our mission is to provide a fast, secure, and transparent experience where users can deposit in-game items and participate in exciting games like coin flips and more.
+                </p>
+                <p class="text-lg text-steel-mist leading-relaxed mb-4">
+                    We use a fully automated escrow bot system to safely handle your trades and returns. Our platform is built with a focus on fairness, user protection, and community enjoyment.
+                </p>
+                <p class="text-lg text-steel-mist leading-relaxed">
+                    We are not affiliated with Roblox Corporation. All virtual items used on this site are for entertainment purposes only and hold no real-world monetary value.
+                </p>
+            </section>
+
+            <h2 class="text-4xl font-extrabold text-off-white mb-6 text-center">Q&A Version</h2>
+
+            <!-- Q&A Section -->
+            <section id="faq-section" class="space-y-4">
+                <!-- Q&A Item 1 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: Who can use BubbleDuel?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: You must be at least 18 years old—or the legal age in your region—to use this site. By accessing the platform, you confirm you meet this requirement.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 2 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: Are my in-game items worth real money?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: No. All in-game items and currency used here are virtual and have no real-world value. They are for entertainment only.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 3 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: Is BubbleDuel affiliated with Roblox?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: No. This site is not affiliated with Roblox or any third-party game companies.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 4 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: Can I use multiple accounts?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: No. Using alternate accounts to cheat, exploit, or gain an unfair advantage is strictly prohibited. Violators may be permanently banned.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 5 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: What happens if the bot fails or gets banned?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: We are not responsible for lost items or failed transactions due to bot issues. Users must verify all trades and contact support if a problem occurs.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 6 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: Do you offer refunds?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: Generally, no. Refunds are not offered unless there is clear evidence of an error, and any refund is at our sole discretion.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 7 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: What activities are not allowed on BubbleDuel?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: You may not:
+                            <ul class="list-disc list-inside ml-4 mt-2">
+                                <li>Break any laws</li>
+                                <li>Commit fraud or abuse</li>
+                                <li>Exploit bugs or glitches</li>
+                                <li>Harm the platform or other users</li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 8 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: Can my access be terminated?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: Yes. We reserve the right to suspend or remove your access at any time, without notice, especially if you break the rules.</p>
+                    </div>
+                </div>
+
+                <!-- Q&A Item 9 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Q: Can the Terms change?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>A: Yes. Terms may be updated at any time. By continuing to use the platform, you agree to any changes made.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Right Sidebar (Chat) -->
+        <aside class="w-[18%] bg-eclipse p-6 rounded-xl shadow-xl ml-6 flex flex-col border border-border-dark h-[calc(100vh-8rem)]">
+            <div class="flex items-center justify-between mb-6 flex-shrink-0">
+                <h3 class="text-3xl font-bold text-off-white">Chat</h3>
+                <button id="chatOptionsButton" class="text-steel-mist hover:text-cyber-candy transition-colors duration-200 text-xl">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto chat-scroll-area pr-3 mb-6">
+                <!-- Chat Messages -->
+                <div class="space-y-4">
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/3C60FF/FFFFFF?text=R" alt="User Avatar" class="rounded-lg border-2 border-sky-pulse chat-avatar">
+                                </span>
+                                <span class="font-semibold text-sky-pulse text-base">@roblox_magic</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">Accident</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">1 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/C040FF/FFFFFF?text=E" alt="User Avatar" class="rounded-lg border-2 border-cyber-candy chat-avatar">
+                                </span>
+                                <span class="font-semibold text-cyber-candy text-base">@eternity41</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">can somebody tip me something?</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">2 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/3C60FF/FFFFFF?text=A" alt="User Avatar" class="rounded-lg border-2 border-sky-pulse chat-avatar">
+                                </span>
+                                <span class="font-semibold text-sky-pulse text-base">@amorWayzn</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">@general pool toks</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">3 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/C040FF/FFFFFF?text=G" alt="User Avatar" class="rounded-lg border-2 border-cyber-candy chat-avatar">
+                                </span>
+                                <span class="font-semibold text-cyber-candy text-base">@gimelboy10002</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">rob</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">4 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/3C60FF/FFFFFF?text=R" alt="User Avatar" class="rounded-lg border-2 border-sky-pulse chat-avatar">
+                                </span>
+                                <span class="font-semibold text-sky-pulse text-base">@roblox_magic</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">Gomem old back on dc</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">5 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="User Avatar" class="rounded-lg border-2 border-cyber-candy chat-avatar">
+                                </span>
+                                <span class="font-semibold text-cyber-candy text-base">@PewPewPews</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">can anyone tip me something?</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">6 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/3C60FF/FFFFFF?text=A" alt="User Avatar" class="rounded-lg border-2 border-sky-pulse chat-avatar">
+                                </span>
+                                <span class="font-semibold text-sky-pulse text-base">@amorWayzn</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">@roblox - can i come to gc im friend</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">7 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/C040FF/FFFFFF?text=T" alt="User Avatar" class="rounded-lg border-2 border-cyber-candy chat-avatar">
+                                </span>
+                                <span class="font-semibold text-cyber-candy text-base">@Tzbowserd814</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">@goofyguy_yt</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">8 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/3C60FF/FFFFFF?text=C" alt="User Avatar" class="rounded-lg border-2 border-sky-pulse chat-avatar">
+                                </span>
+                                <span class="font-semibold text-sky-pulse text-base">@clothestopwobble</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">tip yout82220a</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">9 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/C040FF/FFFFFF?text=J" alt="User Avatar" class="rounded-lg border-2 border-cyber-candy chat-avatar">
+                                </span>
+                                <span class="font-semibold text-cyber-candy text-base">@jimmysyut</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">@general</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">10 min ago</span>
+                    </div>
+                    <div class="chat-message-card">
+                        <div class="flex flex-col min-w-0">
+                            <div class="flex items-center min-w-0">
+                                <span class="relative flex-shrink-0 mr-2">
+                                    <img src="https://placehold.co/40x40/3C60FF/FFFFFF?text=E" alt="User Avatar" class="rounded-lg border-2 border-sky-pulse chat-avatar">
+                                </span>
+                                <span class="font-semibold text-sky-pulse text-base">@eternity41</span>
+                            </div>
+                            <p class="text-steel-mist text-base mt-1 font-medium break-words">can anyone tip me something?</p>
+                        </div>
+                        <span class="text-steel-mist text-sm absolute top-3 right-4">11 min ago</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Chat Input -->
+            <div class="flex-shrink-0">
+                <!-- Online Users Count and Icon -->
+                <div class="flex items-center space-x-2 mb-4">
+                    <div class="w-3 h-3 bg-green-500 rounded-full online-users-pulse"></div>
+                    <span class="text-steel-mist text-base font-semibold">130</span>
+                    <i class="fas fa-users text-steel-mist text-xl"></i>
+                </div>
+                <!-- Input field with integrated icons -->
+                <div class="relative flex items-center w-full rounded-lg overflow-hidden bg-blackest-night border border-border-dark">
+                    <input type="text" id="chatInput" placeholder="Login to chat" class="flex-grow bg-blackest-night text-off-white px-5 py-3 focus:outline-none focus:ring-0 border-none text-base font-medium pr-12 h-12">
+                    <div id="sendIconContainer" class="absolute right-0 top-0 h-full flex items-center justify-center cursor-pointer px-4 bg-sky-pulse rounded-r-lg hover:bg-neon-aura transition-colors duration-200">
+                        <i class="fas fa-paper-plane text-lg text-off-white"></i>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Wallet Modal -->
+    <div id="walletModal" class="modal-overlay hidden">
+        <div class="wallet-card">
+            <div class="wallet-header">
+                <h1 class="text-3xl font-extrabold text-off-white">WALLET</h1>
+                <i class="fas fa-times text-steel-mist text-xl cursor-pointer hover:text-off-white" id="closeWalletModal"></i>
+            </div>
+
+            <div class="flex items-center justify-between mb-6 space-x-4">
+                <div class="relative flex-grow input-group">
+                    <input type="text" id="searchInput" placeholder="Search for an item..." class="w-full bg-blackest-night text-off-white px-4 py-3 rounded-lg border border-border-dark focus:outline-none focus:ring-1 focus:ring-sky-pulse">
+                    <i class="fas fa-search icon"></i>
+                </div>
+
+                <div class="dropdown-container">
+                    <button id="sortDropdownButton" class="dropdown-button">
+                        Highest to Lowest
+                        <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div id="sortDropdownOptions" class="dropdown-options hidden">
+                        <div data-value="highest-lowest">Highest to Lowest</div>
+                        <div data-value="lowest-highest">Lowest to Highest</div>
+                    </div>
+                </div>
+
+                <div class="dropdown-container">
+                    <button id="gameDropdownButton" class="dropdown-button">
+                        All Games
+                        <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div id="gameDropdownOptions" class="dropdown-options hidden">
+                        <div data-value="all-games">All Games</div>
+                        <div data-value="bsgi">BSGI</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items grid container -->
+            <div id="itemsGridContainer" class="flex-grow flex flex-col">
+                <!-- Value Bar -->
+                <div class="value-bar">
+                    <span>Value:</span>
+                    <span id="currentFilteredValueDisplay" class="value-amount">0</span>
+                </div>
+
+                <div id="itemsGrid" class="item-grid">
+                    <!-- Items will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Select All and Withdraw buttons -->
+            <div class="action-buttons">
+                <button id="selectAllButton">Select all</button>
+                <button class="action-button deposit-button" id="depositButton">Deposit</button>
+                <button class="withdraw-button" id="withdrawButton">Withdraw B$0</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal-overlay hidden">
+        <div class="deposit-modal-container">
+            <div class="deposit-header">
+                <h1>Deposit</h1>
+                <button class="close-button" id="closeDepositModal">✕</button>
+            </div>
+
+            <div class="instructions">
+                <p>To deposit your items, follow these steps and trade with one of our verified bots below:</p>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">1</div>
+                    <div class="instruction-text">Click "Join" to trade with one of the bots below</div>
+                </div>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">2</div>
+                    <div class="instruction-text">Send your items to the bot and wait for confirmation</div>
+                </div>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">3</div>
+                    <div class="instruction-text">Your balance will update automatically after the trade</div>
+                </div>
+            </div>
+
+            <div class="bot-list">
+                <!-- Bot Card 1: PucekGoatedFr -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-082F2C2BD1695CAB4F252DE1EBFE5F6D-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="PucekGoatedFr Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">PucekGoatedFr</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot online-dot"></span>
+                                    <span class="status-text online-text">Online</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining PucekGoatedFr!')">Join</button>
+                </div>
+
+                <!-- Bot Card 2: ZedGoatedFr -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C8681DD9D8F8101B2E96C6F9F0C6BDD-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="ZedGoatedFr Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">ZedGoatedFr</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot online-dot"></span>
+                                    <span class="status-text online-text">Online</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining ZedGoatedFr!')">Join</button>
+                </div>
+
+                <!-- Bot Card 3: TharskyGoatedFr -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-FE8D9ADAF612535E3A35FB208FEFE339-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="TharskyGoatedFr Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">TharskyGoatedFr</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot online-dot"></span>
+                                    <span class="status-text online-text">Online</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining TharskyGoatedFr!')">Join</button>
+                </div>
+
+                <!-- Bot Card 4: Bsgi_Flip (Offline) -->
+                <div class="bot-card">
+                    <div class="bot-info">
+                        <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-22F7E8D8DA06B911761129365A47481A-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="Bsgi_Flip Avatar" class="bot-avatar">
+                        <div class="bot-details">
+                            <div class="flex items-center">
+                                <span class="bot-name">Bsgi_Flip</span>
+                                <div class="bot-status-container">
+                                    <span class="bot-status-dot offline-dot"></span>
+                                    <span class="status-text offline-text">Offline</span>
+                                </div>
+                            </div>
+                            <span class="bot-game">BGSI</span>
+                        </div>
+                    </div>
+                    <button class="join-button" onclick="alert('Joining Bsgi_Flip!')">Join</button>
+                </div>
+            </div>
+
+            <div class="security-tip">
+                <strong>Important Security Notice:</strong> Always double-check the username of any trading partner. Be aware that impersonators may use similar names or avatars to deceive you!
+            </div>
+
+            <div class="balance-footer">
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Rules Modal -->
+    <div id="chatRulesModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-3xl font-bold text-off-white mb-6 text-center">Chat Rules</h3>
+            <ul class="list-disc list-inside text-steel-mist text-lg space-y-3 mb-8">
+                <li>Be respectful to others at all times.</li>
+                <li>No spamming, trolling, or advertising.</li>
+                <li>Do not share personal info or ask for it.</li>
+                <li>Use appropriate language; hate speech is not tolerated.</li>
+                <li>Follow all community guidelines and moderator instructions.</li>
+            </ul>
+            <button id="understandButton" class="w-full bg-sky-pulse text-off-white px-8 py-4 rounded-lg hover:bg-neon-aura transition-colors duration-300 font-bold text-xl shadow-lg">
+                I Understand
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal Component -->
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="confirmation-modal-content">
+            <i class="fas fa-times confirmation-modal-close" id="closeConfirmationModal"></i>
+            <i class="fas fa-sign-out-alt confirmation-modal-icon" id="confirmationModalIcon"></i>
+            <h3 class="confirmation-modal-title" id="confirmationModalTitle">Confirm Action</h3>
+            <p class="confirmation-modal-message" id="confirmationModalMessage">Are you sure you want to proceed?</p>
+            <div class="flex justify-center space-x-4">
+                <button class="confirmation-modal-button primary" id="confirmActionButton">Confirm</button>
+                <button class="confirmation-modal-button secondary" id="cancelActionButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Leaderboard Data
+        const leaderboardData = [
+            { rank: 1, user: "BorderBandit205", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "601.1M", profit: "5.8M" },
+            { rank: 2, user: "tharskyhitter", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "401.0M", profit: "16.0M" },
+            { rank: 3, user: "Elikanroblox", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "396.0M", profit: "6.9M" },
+            { rank: 4, user: "BGS_HHA", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "391.7M", profit: "-2.3M" },
+            { rank: 5, user: "FlippingBurgers...", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "332.2M", profit: "4.3M" },
+            { rank: 6, user: "Griemmfiend", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "258.3M", profit: "2.6M" },
+            { rank: 7, user: "PlayerSeven", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "200.0M", profit: "1.5M" },
+            { rank: 8, user: "GamerEight", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "180.0M", profit: "-0.5M" },
+            { rank: 9, user: "NinthPlayer", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "150.0M", profit: "3.0M" },
+            { rank: 10, user: "TenaciousGamer", avatar: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B788536395A2B2D0580BDE5DCE7969C1-Png/150/150/AvatarHeadshot/Webp/noFilter", wager: "120.0M", profit: "0.8M" }
+        ];
+
+        // Function to render leaderboard
+        function renderLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+            
+            leaderboardData.forEach(player => {
+                const row = document.createElement('div');
+                row.className = 'leaderboard-row';
+
+                // Determine profit class for styling (negative profit in red)
+                const profitClass = player.profit.includes('-') ? 'negative' : '';
+
+                // Determine color for rank and avatar border
+                const rankColorClass = (player.rank % 2 === 1) ? 'rank-blue' : 'rank-pink';
+                const avatarBorderClass = (player.rank % 2 === 1) ? 'border-blue' : 'border-pink';
+
+                row.innerHTML = `
+                    <div class="leaderboard-rank ${rankColorClass}">${player.rank === 1 ? '&#x2605;' : `#${player.rank}`}</div>
+                    <div class="leaderboard-user">
+                        <img src="${player.avatar}" alt="${player.user}'s Avatar" class="${avatarBorderClass}" onerror="this.onerror=null;this.src='https://placehold.co/48x48/8A8D99/FFFFFF?text=AV';" />
+                        <span class="text-off-white font-semibold">${player.user}</span>
+                    </div>
+                    <div class="leaderboard-wager">
+                        <i class="fas fa-coins"></i><span class="ml-2">${player.wager}</span>
+                    </div>
+                    <div class="leaderboard-profit ${profitClass}">
+                        <i class="fas fa-coins"></i><span class="ml-2">${player.profit}</span>
+                    </div>
+                `;
+                leaderboardList.appendChild(row);
+            });
+        }
+
+        // Event listeners for leaderboard modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const leaderboardButton = document.getElementById('leaderboardButton');
+            const leaderboardModal = document.getElementById('leaderboardModal');
+            const closeLeaderboard = document.getElementById('closeLeaderboard');
+
+            // Show leaderboard modal
+            leaderboardButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                renderLeaderboard();
+                leaderboardModal.classList.remove('hidden');
+            });
+
+            // Hide leaderboard modal
+            closeLeaderboard.addEventListener('click', function() {
+                leaderboardModal.classList.add('hidden');
+            });
+
+            // Hide modal when clicking outside
+            leaderboardModal.addEventListener('click', function(e) {
+                if (e.target === leaderboardModal) {
+                    leaderboardModal.classList.add('hidden');
+                }
+            });
+        });
+
+        // ...existing code...
+        // chatInput, sendIconContainer, chatOptionsButton, chatRulesModal, and understandButton are already declared above if needed
+        // ...existing code...
+        // Function to fetch and display wallet balance (retained for consistency with nav)
+        async function fetchWalletBalance() {
+            const walletBalanceSpan = document.getElementById('walletBalance');
+            try {
+                const response = await new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve({
+                            ok: true,
+                            json: () => Promise.resolve({
+                                balance: 123456
+                            })
+                        });
+                    }, 300);
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                walletBalanceSpan.textContent = data.balance.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching wallet balance:', error);
+                walletBalanceSpan.textContent = 'Error';
+            }
+        }
+
+        // Initialize wallet balance on page load
+        document.addEventListener('DOMContentLoaded', fetchWalletBalance);
+
+        // Sample wallet items data
+        const allWalletItems = [
+            { name: "Overlord Plushie", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 80, largeValue: 4000, game: "BSGI" },
+            { name: "Shiny Sword of Awesomeness", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 120, largeValue: 6000, game: "All Games" },
+            { name: "Legendary Shield", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 70, largeValue: 3500, game: "BSGI" },
+            { name: "Magic Potion", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 30, largeValue: 1500, game: "All Games" },
+            { name: "Rare Gemstone of Power", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 200, largeValue: 10000, game: "BSGI" },
+            { name: "Enchanted Bow", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 90, largeValue: 4500, game: "All Games" },
+            { name: "Mystic Amulet", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 60, largeValue: 3000, game: "BSGI" },
+            { name: "Swift Boots", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 40, largeValue: 2000, game: "All Games" },
+            { name: "Dragon Scale Armor", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 250, largeValue: 12500, game: "BSGI" },
+            { name: "Phoenix Feather", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 150, largeValue: 7500, game: "All Games" },
+            { name: "Glimmering Orb", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 50, largeValue: 2500, game: "BSGI" },
+            { name: "Ancient Scroll", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 100, largeValue: 5000, game: "All Games" },
+            { name: "Shadow Dagger", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 110, largeValue: 5500, game: "BSGI" },
+            { name: "Crystal Wand", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 130, largeValue: 6500, game: "All Games" },
+            { name: "Elixir of Life", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 75, largeValue: 3750, game: "BSGI" },
+            { name: "Titan's Gauntlet", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 300, largeValue: 15000, game: "All Games" },
+            { name: "Frosty Blade", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 95, largeValue: 4750, game: "BSGI" },
+            { name: "Inferno Staff", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 180, largeValue: 9000, game: "All Games" },
+            { name: "Windwalker Boots", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 65, largeValue: 3250, game: "BSGI" },
+            { name: "Starfall Robes", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 220, largeValue: 11000, game: "All Games" },
+            { name: "Ocean's Embrace", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 140, largeValue: 7000, game: "BSGI" },
+            { name: "Desert Scimitar", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 85, largeValue: 4250, game: "All Games" },
+            { name: "Forest Guardian Helm", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 105, largeValue: 5250, game: "BSGI" },
+            { name: "Volcanic Axe", image: "https://www.bgsi.gg/items/overlord-plushie.png", gemValue: 170, largeValue: 8500, game: "All Games" }
+        ];
+
+        let currentFilteredItems = [...allWalletItems];
+        let currentSortOrder = 'highest-lowest';
+        let currentGameFilter = 'all-games';
+
+        // Function to calculate and display total value of currently filtered items
+        function updateCurrentFilteredValueDisplay() {
+            const totalValue = currentFilteredItems.reduce((sum, item) => sum + item.largeValue, 0);
+            document.getElementById('currentFilteredValueDisplay').textContent = `$${totalValue.toLocaleString()}`;
+        }
+
+        // Function to render items in the grid
+        function renderItems(items) {
+            const itemsGrid = document.getElementById('itemsGrid');
+            itemsGrid.innerHTML = ''; // Clear existing items
+
+            if (items.length === 0) {
+                itemsGrid.innerHTML = `
+                    <div class="no-items-container col-span-full">
+                        <p class="text-steel-mist text-lg mb-6">No items found in your inventory.</p>
+                        <button class="deposit-button-large" onclick="alert('Deposit functionality would be implemented here!')">
+                            Deposit
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item-grid-item';
+                itemDiv.dataset.value = item.largeValue; // Store value for selection
+                itemDiv.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null;this.src='https://placehold.co/80x80/8A8D99/FFFFFF?text=Error';" />
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-value"><i class="fas fa-gem"></i>${item.gemValue}</span>
+                    <div class="large-value">${item.largeValue.toLocaleString()}</div>
+                `;
+                itemsGrid.appendChild(itemDiv);
+            });
+            updateSelectAllButtonText(); // Update select all button state after rendering
+            updateCurrentFilteredValueDisplay(); // Update the value bar after rendering
+        }
+
+        // Function to filter and sort items
+        function filterAndSortItems() {
+            let filteredItems = [...allWalletItems];
+
+            // Apply search filter
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filteredItems = filteredItems.filter(item =>
+                    item.name.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply game filter
+            if (currentGameFilter !== 'all-games') {
+                filteredItems = filteredItems.filter(item => item.game === currentGameFilter);
+            }
+
+            // Apply sort order
+            if (currentSortOrder === 'highest-lowest') {
+                filteredItems.sort((a, b) => b.largeValue - a.largeValue);
+            } else if (currentSortOrder === 'lowest-highest') {
+                filteredItems.sort((a, b) => a.largeValue - b.largeValue);
+            }
+
+            currentFilteredItems = filteredItems; // Update the global filtered items
+            renderItems(currentFilteredItems);
+        }
+
+        // Function to update the "Select all" button text
+        function updateSelectAllButtonText() {
+            const allItems = document.getElementById('itemsGrid').querySelectorAll('.item-grid-item');
+            const selectedItems = document.getElementById('itemsGrid').querySelectorAll('.item-grid-item.selected');
+            const selectAllButton = document.getElementById('selectAllButton');
+
+            if (selectedItems.length === allItems.length && allItems.length > 0) {
+                selectAllButton.textContent = 'Deselect all';
+            } else {
+                selectAllButton.textContent = 'Select all';
+            }
+        }
+
+        // Function to update the withdraw button value
+        function updateWithdrawValue() {
+            const selectedItems = document.getElementById('itemsGrid').querySelectorAll('.item-grid-item.selected');
+            let totalWithdrawValue = 0;
+            selectedItems.forEach(item => {
+                totalWithdrawValue += parseInt(item.dataset.value);
+            });
+            document.getElementById('withdrawButton').textContent = `Withdraw B$${totalWithdrawValue.toLocaleString()}`;
+        }
+
+        // Dropdown functionality
+        function setupDropdown(buttonId, optionsId, type) {
+            const button = document.getElementById(buttonId);
+            const options = document.getElementById(optionsId);
+
+            if (!button || !options) return;
+
+            button.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent click from closing other dropdowns
+                // Close other dropdowns
+                document.querySelectorAll('.dropdown-options').forEach(otherOptions => {
+                    if (otherOptions.id !== optionsId) {
+                        otherOptions.classList.add('hidden');
+                    }
+                });
+                options.classList.toggle('hidden');
+            });
+
+            options.querySelectorAll('div').forEach(option => {
+                option.addEventListener('click', () => {
+                    button.childNodes[0].nodeValue = option.textContent + ' '; // Update button text
+                    options.classList.add('hidden');
+                    if (type === 'sort') {
+                        currentSortOrder = option.dataset.value;
+                    } else if (type === 'game') {
+                        currentGameFilter = option.dataset.value;
+                    }
+                    filterAndSortItems(); // Re-filter and re-sort
+                });
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', (event) => {
+                if (!button.contains(event.target) && !options.contains(event.target)) {
+                    options.classList.add('hidden');
+                }
+            });
+        }
+
+        // Wallet Modal Functionality
+        const walletButton = document.getElementById('walletButton');
+        const walletModal = document.getElementById('walletModal');
+        const closeWalletModal = document.getElementById('closeWalletModal');
+
+        // Deposit Modal Functionality
+        const depositButton = document.getElementById('depositButton');
+        const depositModal = document.getElementById('depositModal');
+        const closeDepositModal = document.getElementById('closeDepositModal');
+
+        // Event listeners for wallet functionality
+        if (walletButton) {
+            walletButton.addEventListener('click', () => {
+                walletModal.classList.remove('hidden');
+                setupDropdown('sortDropdownButton', 'sortDropdownOptions', 'sort');
+                setupDropdown('gameDropdownButton', 'gameDropdownOptions', 'game');
+                filterAndSortItems(); // Initial render with filters/sort
+                updateCurrentFilteredValueDisplay(); // Display initial total filtered value
+
+                // Search input event listener
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', filterAndSortItems);
+                }
+
+                // Select All functionality
+                const selectAllButton = document.getElementById('selectAllButton');
+                const itemsGrid = document.getElementById('itemsGrid');
+
+                if (selectAllButton) {
+                    selectAllButton.addEventListener('click', () => {
+                        const allItems = itemsGrid.querySelectorAll('.item-grid-item');
+                        let allSelected = true;
+
+                        // Check if all *displayed* items are already selected
+                        allItems.forEach(item => {
+                            if (!item.classList.contains('selected')) {
+                                allSelected = false;
+                            }
+                        });
+
+                        if (allSelected) {
+                            // If all are selected, deselect all
+                            allItems.forEach(item => {
+                                item.classList.remove('selected');
+                            });
+                        } else {
+                            // If not all are selected, select all
+                            allItems.forEach(item => {
+                                item.classList.add('selected');
+                            });
+                        }
+                        updateSelectAllButtonText();
+                        updateWithdrawValue();
+                    });
+                }
+
+                // Individual item selection
+                if (itemsGrid) {
+                    itemsGrid.addEventListener('click', (event) => {
+                        const item = event.target.closest('.item-grid-item');
+                        if (item) {
+                            item.classList.toggle('selected');
+                            updateSelectAllButtonText();
+                            updateWithdrawValue();
+                        }
+                    });
+                }
+
+                // Deposit button functionality (for the main action buttons)
+                if (depositButton && !depositButton.hasAttribute('data-deposit-setup')) {
+                    depositButton.setAttribute('data-deposit-setup', 'true');
+                    depositButton.addEventListener('click', () => {
+                        console.log('Deposit button clicked!');
+                        if (walletModal) {
+                            walletModal.classList.add('hidden');
+                        }
+                        if (depositModal) {
+                            depositModal.classList.remove('hidden');
+                        }
+                    });
+                }
+            });
+        }
+
+        if (closeWalletModal) {
+            closeWalletModal.addEventListener('click', () => {
+                walletModal.classList.add('hidden');
+            });
+        }
+
+        if (walletModal) {
+            walletModal.addEventListener('click', (event) => {
+                if (event.target === walletModal) {
+                    walletModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Deposit modal functionality
+        if (closeDepositModal) {
+            closeDepositModal.addEventListener('click', () => {
+                depositModal.classList.add('hidden');
+            });
+        }
+
+        if (depositModal) {
+            depositModal.addEventListener('click', (event) => {
+                if (event.target === depositModal) {
+                    depositModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Show chat rules modal
+        chatOptionsButton.addEventListener('click', () => {
+            chatRulesModal.classList.remove('hidden');
+        });
+
+        // Hide chat rules modal
+        understandButton.addEventListener('click', () => {
+            chatRulesModal.classList.add('hidden');
+        });
+
+        // Remove hardcoded chat messages and make chat dynamic
+        const chatMessagesContainer = document.querySelector('.chat-scroll-area .space-y-4');
+        if (chatMessagesContainer) {
+            chatMessagesContainer.innerHTML = '';
+        }
+
+        // Example function to add a chat message (new messages at the bottom)
+        function addChatMessage(username, message, avatarColor = 'sky-pulse', timestamp = 'Just now') {
+            if (!chatMessagesContainer) return;
+            const messageCard = document.createElement('div');
+            messageCard.className = 'chat-message-card';
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'flex flex-col min-w-0';
+            const usernameSpan = document.createElement('span');
+            usernameSpan.className = `font-semibold text-${avatarColor} text-base`;
+            usernameSpan.textContent = `@${username}`;
+            const messageP = document.createElement('p');
+            messageP.className = 'text-steel-mist text-base mt-1 font-medium break-words';
+            messageP.textContent = message;
+            contentWrapper.appendChild(usernameSpan);
+            contentWrapper.appendChild(messageP);
+            const timestampSpan = document.createElement('span');
+            timestampSpan.className = 'text-steel-mist text-sm absolute top-3 right-4';
+            timestampSpan.textContent = timestamp;
+            messageCard.appendChild(contentWrapper);
+            messageCard.appendChild(timestampSpan);
+            chatMessagesContainer.appendChild(messageCard); // Add to bottom
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        }
+
+        // Require login to chat: clicking chat bar redirects to login.html
+        if (chatInput) {
+            const chatInputBar = chatInput.parentElement;
+            if (chatInputBar) {
+                chatInputBar.style.cursor = 'pointer';
+                chatInputBar.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    window.location.href = 'login.html';
+                });
+            }
+        }
+
+        // Confirmation Modal Functionality
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeConfirmationModal = document.getElementById('closeConfirmationModal');
+        const confirmActionButton = document.getElementById('confirmActionButton');
+        const cancelActionButton = document.getElementById('cancelActionButton');
+        const confirmationModalIcon = document.getElementById('confirmationModalIcon');
+        const confirmationModalTitle = document.getElementById('confirmationModalTitle');
+        const confirmationModalMessage = document.getElementById('confirmationModalMessage');
+
+        // Store the current action to be confirmed
+        let currentConfirmationAction = null;
+
+        // Function to show confirmation modal
+        function showConfirmationModal(config) {
+            confirmationModalIcon.className = `fas ${config.icon} confirmation-modal-icon`;
+            confirmationModalTitle.textContent = config.title;
+            confirmationModalMessage.textContent = config.message;
+            confirmActionButton.textContent = config.confirmText;
+            currentConfirmationAction = config.action;
+            confirmationModal.classList.remove('hidden');
+        }
+
+        // Hide the modal when the close icon is clicked
+        closeConfirmationModal.addEventListener('click', () => {
+            confirmationModal.classList.add('hidden');
+            currentConfirmationAction = null;
+        });
+
+        // Hide the modal when the cancel button is clicked
+        cancelActionButton.addEventListener('click', () => {
+            confirmationModal.classList.add('hidden');
+            currentConfirmationAction = null;
+        });
+
+        // Handle the confirmation action
+        confirmActionButton.addEventListener('click', () => {
+            if (currentConfirmationAction) {
+                currentConfirmationAction();
+            }
+            confirmationModal.classList.add('hidden');
+            currentConfirmationAction = null;
+        });
+
+        // Hide modal if clicked outside (on the overlay)
+        confirmationModal.addEventListener('click', (event) => {
+            if (event.target === confirmationModal) {
+                confirmationModal.classList.add('hidden');
+                currentConfirmationAction = null;
+            }
+        });
+
+        // Logout Button Confirmation
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                showConfirmationModal({
+                    icon: 'fa-sign-out-alt',
+                    title: 'Log out of your account?',
+                    message: "Are you sure you want to log out? You'll need to log in again to access your account.",
+                    confirmText: 'Yes, log out',
+                    action: () => {
+                        console.log('User logged out');
+                        // Add actual logout logic here
+                        alert('Logged out successfully!');
+                    }
+                });
+            });
+        }
+
+        // Login Button - Redirect to login page
+        const loginButton = document.getElementById('loginButton');
+        if (loginButton) {
+            loginButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'login.html';
+            });
+        }
+
+
+        // Q&A Dropdown functionality
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const faqItem = button.closest('.faq-item');
+                const answer = faqItem.querySelector('.faq-answer');
+                const icon = button.querySelector('i');
+
+                // Close all other open answers
+                document.querySelectorAll('.faq-answer.active').forEach(openAnswer => {
+                    if (openAnswer !== answer) {
+                        openAnswer.classList.remove('active');
+                        openAnswer.previousElementSibling.classList.remove('active'); // Deactivate question button
+                    }
+                });
+
+                // Toggle the clicked answer
+                answer.classList.toggle('active');
+                button.classList.toggle('active'); // Toggle active class on question button for icon rotation
+            });
+        });
+    </script>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal-overlay hidden">
+        <div class="leaderboard-card">
+            <div class="leaderboard-header">
+                <h1 class="text-3xl font-extrabold text-off-white">LEADERBOARD</h1>
+                <i class="fas fa-times text-steel-mist text-xl cursor-pointer hover:text-off-white" id="closeLeaderboard"></i>
+            </div>
+
+            <div class="leaderboard-table-header">
+                <div class="leaderboard-rank">#</div>
+                <div class="leaderboard-user">User</div>
+                <div class="leaderboard-wager">Wager</div>
+                <div class="leaderboard-profit">Profit</div>
+            </div>
+
+            <div id="leaderboardList">
+                <!-- Leaderboard rows will be dynamically inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

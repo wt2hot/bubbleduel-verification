@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BubbleDuel - Login</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Custom Tailwind CSS configuration to extend default colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blackest-night': '#0D0D10',
+                        'eclipse': '#15161B',
+                        'off-white': '#F1F1F1',
+                        'steel-mist': '#8A8D99',
+                        'sky-pulse': '#3C60FF',
+                        'cyber-candy': '#C040FF',
+                        'neon-aura': '#6A8FFF',
+                        'pulse-pink': '#E060FF',
+                        'border-dark': '#0A0A0C',
+                        'chat-card-bg': '#0D0E13',
+                        'gradient-start': '#6A8FFF', /* Neon Aura */
+                        'gradient-end': '#C040FF',   /* Cyber Candy */
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Inter font from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0D0D10; /* Blackest Night */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            overflow: hidden; /* Prevent scrollbars from background animation */
+            position: relative;
+        }
+
+        /* Animated Background Effect */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(60, 96, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(192, 64, 255, 0.15) 0%, transparent 50%);
+            background-size: 200% 200%;
+            animation: background-pan 20s linear infinite alternate;
+            z-index: -1;
+        }
+
+        @keyframes background-pan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        /* Login Container Styles */
+        .login-container {
+            background-color: #15161B; /* Eclipse */
+            border-radius: 1rem;
+            padding: 2.5rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+            border: 1px solid #0A0A0C; /* Border Dark */
+            position: relative;
+            z-index: 10; /* Ensure it's above the background */
+
+            /* Initial state for entry animation */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: #8A8D99; /* Steel Mist */
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .close-button:hover {
+            color: #F1F1F1; /* Off-white */
+            transform: rotate(90deg);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-text-primary {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            text-shadow: 0 0 8px rgba(192, 64, 255, 0.7); /* Text glow */
+            color: #C040FF; /* Cyber Candy (pink) */
+        }
+
+        .logo-text-secondary {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            text-shadow: 0 0 8px rgba(60, 96, 255, 0.7); /* Text glow */
+            color: #3C60FF; /* Sky Pulse (blue) */
+        }
+
+        .welcome-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #F1F1F1;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .info-text {
+            color: #8A8D99;
+            text-align: center;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .progress-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #0D0D10; /* Blackest Night */
+            color: #8A8D99; /* Steel Mist */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            border: 2px solid #0A0A0C; /* Border Dark */
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Springy transition */
+            box-shadow: 0 0 0 rgba(0,0,0,0); /* Initial shadow for animation */
+            cursor: pointer; /* Make circles clickable */
+        }
+
+        .progress-circle.active {
+            background-color: #6A8FFF; /* Neon Aura */
+            color: #F1F1F1;
+            border-color: #6A8FFF;
+            transform: scale(1.2); /* Pop effect */
+            box-shadow: 0 0 15px rgba(106, 143, 255, 0.7); /* Stronger glow */
+        }
+
+        .progress-line {
+            width: 60px;
+            height: 2px;
+            background-color: #0A0A0C; /* Border Dark */
+            margin: 0 0.5rem;
+            transition: background-color 0.4s ease, width 0.4s ease;
+        }
+
+        .progress-line.active {
+            background-color: #6A8FFF; /* Neon Aura */
+            width: 80px; /* Expand slightly */
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            color: #F1F1F1;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: block;
+            font-size: 1.125rem;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            background-color: #0D0D10; /* Blackest Night */
+            border: 1px solid #0A0A0C; /* Border Dark */
+            color: #F1F1F1;
+            font-size: 1.125rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .text-input:focus {
+            border-color: #6A8FFF; /* Neon Aura on focus */
+            box-shadow: 0 0 0 4px rgba(106, 143, 255, 0.4); /* Stronger glow */
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #8A8D99; /* Steel Mist */
+            border-radius: 0.5rem;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Springy transition */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .custom-checkbox.checked {
+            background-color: #6A8FFF; /* Neon Aura */
+            border-color: #6A8FFF;
+            transform: scale(1.1); /* Pop effect */
+            box-shadow: 0 0 10px rgba(106, 143, 255, 0.5);
+        }
+
+        .custom-checkbox.checked i {
+            color: #F1F1F1;
+            font-size: 0.9rem;
+            animation: check-bounce 0.4s ease-out;
+        }
+
+        @keyframes check-bounce {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        .checkbox-label {
+            color: #8A8D99;
+            font-size: 1rem;
+            margin-left: 0.75rem; /* Added space here */
+        }
+
+        .checkbox-label a {
+            color: #6A8FFF; /* Neon Aura */
+            text-decoration: none;
+            transition: color 0.2s ease, text-shadow 0.2s ease;
+        }
+
+        .checkbox-label a:hover {
+            color: #3C60FF; /* Sky Pulse */
+            text-shadow: 0 0 5px rgba(60, 96, 255, 0.5);
+        }
+
+        .continue-button {
+            width: 100%;
+            padding: 1.25rem 2rem;
+            border-radius: 0.75rem;
+            background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: #F1F1F1;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Initial shadow */
+        }
+
+        .continue-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: all 0.5s ease;
+            z-index: -1;
+        }
+
+        .continue-button:hover::before {
+            left: 100%;
+        }
+
+        .continue-button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-3px); /* Lift effect */
+            box-shadow: 0 8px 20px rgba(106, 143, 255, 0.6); /* Enhanced glow */
+        }
+
+        .continue-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .continue-button .spinner {
+            border: 4px solid rgba(241, 241, 241, 0.3);
+            border-top: 4px solid #F1F1F1;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-right: 0.75rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Verify Ownership Specific Styles */
+        .copy-input-group {
+            display: flex;
+            align-items: center;
+            background-color: #0D0D10; /* Blackest Night */
+            border: 1px solid #0A0A0C; /* Border Dark */
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        .copy-input {
+            flex-grow: 1;
+            background-color: transparent;
+            border: none;
+            color: #F1F1F1;
+            font-size: 1rem;
+            outline: none;
+            padding: 0 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: text;
+        }
+
+        .copy-button {
+            background-color: #3C60FF; /* Sky Pulse */
+            color: #F1F1F1;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .copy-button:hover {
+            background-color: #6A8FFF; /* Neon Aura */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(60, 96, 255, 0.4);
+        }
+
+        .copy-button i {
+            font-size: 1rem;
+        }
+
+        .copy-message {
+            color: #3C60FF; /* Sky Pulse */
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+
+        .copy-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Step transition animation */
+        .login-step {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .login-step.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none; /* Disable interactions when hidden */
+            position: absolute; /* Take out of flow for smooth transition */
+            width: calc(100% - 5rem); /* Match parent width minus padding */
+        }
+        #step2 {
+             /* Ensure step2 is positioned correctly when hidden */
+            top: 2.5rem; /* Match padding-top of container */
+            left: 2.5rem; /* Match padding-left of container */
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <i class="fas fa-times close-button" id="closeButton"></i>
+
+        <div class="logo-section">
+            <span class="logo-text-primary">Bubble</span><span class="logo-text-secondary">Duel</span>
+        </div>
+
+        <h2 class="welcome-title">Welcome to BubbleDuel</h2>
+        <p class="info-text">
+            By logging in, you confirm you are at least 18, your items are not stolen, and you agree to our <a href="#" id="termsLinkInfo" class="text-neon-aura hover:underline">Terms of Service</a>
+        </p>
+
+        <div class="progress-indicator">
+            <div class="progress-circle active" id="step1Circle">1</div>
+            <div class="progress-line" id="progressLine"></div>
+            <div class="progress-circle" id="step2Circle">2</div>
+        </div>
+
+        <!-- Step 1: Roblox Username -->
+        <div id="step1" class="login-step">
+            <div class="form-group">
+                <label for="robloxUsername" class="form-label">Roblox Username</label>
+                <input type="text" id="robloxUsername" class="text-input" placeholder="Enter your Roblox username..." required>
+            </div>
+
+            <div class="checkbox-container">
+                <div class="custom-checkbox" id="termsCheckbox">
+                    <i class="fas fa-check hidden"></i>
+                </div>
+                <label for="termsCheckbox" class="checkbox-label">
+                    I agree to the <a href="#" id="termsLink">Terms of Service</a>
+                </label>
+            </div>
+
+            <button class="continue-button" id="continueButton">
+                Continue
+            </button>
+        </div>
+
+        <!-- Step 2: Verify Ownership -->
+        <div id="step2" class="login-step hidden">
+            <div class="form-group">
+                <label for="verifyPhrase" class="form-label">Verify Ownership</label>
+                <div class="copy-input-group">
+                    <input type="text" id="verifyPhrase" class="copy-input" value="" readonly>
+                    <button class="copy-button" id="copyButton">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <p class="copy-message" id="copyMessage">Copied to clipboard!</p>
+                <p class="text-steel-mist text-center text-sm mt-4">
+                    Paste the verification code into your Roblox profile description, then click Finish.
+                </p>
+            </div>
+
+            <div class="checkbox-container">
+                <div class="custom-checkbox checked" id="termsCheckbox2">
+                    <i class="fas fa-check"></i>
+                </div>
+                <label for="termsCheckbox2" class="checkbox-label">
+                    I agree to the <a href="#" id="termsLink2">Terms of Service</a>
+                </label>
+            </div>
+
+            <button class="continue-button" id="finishButton">
+                Finish
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const closeButton = document.getElementById('closeButton');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step1Circle = document.getElementById('step1Circle');
+        const step2Circle = document.getElementById('step2Circle');
+        const progressLine = document.getElementById('progressLine');
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        const termsCheckboxIcon = termsCheckbox.querySelector('i');
+        const termsCheckbox2 = document.getElementById('termsCheckbox2'); // Checkbox for step 2
+        const termsCheckbox2Icon = termsCheckbox2.querySelector('i');
+        const continueButton = document.getElementById('continueButton');
+        const finishButton = document.getElementById('finishButton');
+        const robloxUsernameInput = document.getElementById('robloxUsername');
+        const verifyPhraseInput = document.getElementById('verifyPhrase');
+        const copyButton = document.getElementById('copyButton');
+        const copyMessage = document.getElementById('copyMessage');
+        const termsLink = document.getElementById('termsLink');
+        const termsLink2 = document.getElementById('termsLink2');
+        const termsLinkInfo = document.getElementById('termsLinkInfo'); // New link in info text
+
+        let isTermsAgreed = false; // State for the terms checkbox
+
+        // --- Backend URLs ---
+        const API_BASE = 'https://your-render-url.onrender.com'; // Replace with your Render URL
+        const generateCodeURL = `${API_BASE}/roblox/generate-code`;
+        const verifyUserURL = `${API_BASE}/roblox/verify-real`; // Use real verification endpoint
+
+
+        // Function to show a custom confirmation dialog
+        function showConfirmDialog(title, message, confirmText, cancelText) {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 15000;
+                `;
+
+                const dialog = document.createElement('div');
+                dialog.style.cssText = `
+                    background-color: #15161B;
+                    border-radius: 1rem;
+                    padding: 2rem;
+                    max-width: 400px;
+                    width: 90%;
+                    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.7);
+                    border: 1px solid #0A0A0C;
+                `;
+
+                dialog.innerHTML = `
+                    <h3 style="color: #F1F1F1; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">${title}</h3>
+                    <p style="color: #8A8D99; margin-bottom: 2rem; text-align: center; line-height: 1.6;">${message}</p>
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="confirmBtn" style="
+                            flex: 1;
+                            padding: 0.75rem 1.5rem;
+                            border-radius: 0.5rem;
+                            background: linear-gradient(90deg, #6A8FFF 0%, #C040FF 100%);
+                            color: #F1F1F1;
+                            font-weight: 600;
+                            border: none;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">${confirmText}</button>
+                        <button id="cancelBtn" style="
+                            flex: 1;
+                            padding: 0.75rem 1.5rem;
+                            border-radius: 0.5rem;
+                            background-color: #0D0D10;
+                            color: #8A8D99;
+                            font-weight: 600;
+                            border: 1px solid #0A0A0C;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">${cancelText}</button>
+                    </div>
+                `;
+
+                overlay.appendChild(dialog);
+                document.body.appendChild(overlay);
+
+                const confirmBtn = dialog.querySelector('#confirmBtn');
+                const cancelBtn = dialog.querySelector('#cancelBtn');
+
+                confirmBtn.addEventListener('click', () => {
+                    document.body.removeChild(overlay);
+                    resolve(true);
+                });
+
+                cancelBtn.addEventListener('click', () => {
+                    document.body.removeChild(overlay);
+                    resolve(false);
+                });
+
+                // Add hover effects
+                confirmBtn.addEventListener('mouseover', () => {
+                    confirmBtn.style.filter = 'brightness(1.1)';
+                    confirmBtn.style.transform = 'translateY(-2px)';
+                });
+                confirmBtn.addEventListener('mouseout', () => {
+                    confirmBtn.style.filter = 'brightness(1)';
+                    confirmBtn.style.transform = 'translateY(0)';
+                });
+
+                cancelBtn.addEventListener('mouseover', () => {
+                    cancelBtn.style.backgroundColor = '#15161B';
+                    cancelBtn.style.color = '#F1F1F1';
+                });
+                cancelBtn.addEventListener('mouseout', () => {
+                    cancelBtn.style.backgroundColor = '#0D0D10';
+                    cancelBtn.style.color = '#8A8D99';
+                });
+            });
+        }
+
+        // Function to show a custom message box instead of alert()
+        function showMessageBox(message, type = 'info') {
+            const messageBox = document.createElement('div');
+            messageBox.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: ${type === 'error' ? '#E060FF' : '#3C60FF'};
+                color: #F1F1F1;
+                padding: 1.5rem 2rem;
+                border-radius: 0.75rem;
+                box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+                z-index: 10000;
+                font-size: 1.125rem;
+                font-weight: 600;
+                text-align: center;
+                opacity: 0;
+                transition: opacity 0.3s ease-in-out;
+            `;
+            messageBox.textContent = message;
+            document.body.appendChild(messageBox);
+
+            setTimeout(() => {
+                messageBox.style.opacity = 1;
+            }, 50);
+
+            setTimeout(() => {
+                messageBox.style.opacity = 0;
+                messageBox.addEventListener('transitionend', () => messageBox.remove());
+            }, 3000);
+        }
+
+        // Function to navigate to Step 1
+        function goToStep1() {
+            step2.style.opacity = '0';
+            step2.style.transform = 'translateY(-20px)';
+            step2.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                step2.classList.add('hidden');
+                step1.classList.remove('hidden');
+                step1.style.opacity = '0';
+                step1.style.transform = 'translateY(20px)';
+                step1.style.pointerEvents = 'auto';
+
+                void step1.offsetWidth; // Force reflow
+
+                step1.style.opacity = '1';
+                step1.style.transform = 'translateY(0)';
+
+                step2Circle.classList.remove('active');
+                step1Circle.classList.add('active');
+                progressLine.classList.remove('active');
+            }, 500);
+        }
+
+        // Close button functionality - now redirects to bubble.html
+        closeButton.addEventListener('click', () => {
+            window.location.href = 'bubble.html';
+        });
+
+        // Terms checkbox functionality
+        termsCheckbox.addEventListener('click', () => {
+            isTermsAgreed = !isTermsAgreed;
+            if (isTermsAgreed) {
+                termsCheckbox.classList.add('checked');
+                termsCheckboxIcon.classList.remove('hidden');
+            } else {
+                termsCheckbox.classList.remove('checked');
+                termsCheckboxIcon.classList.add('hidden');
+            }
+        });
+
+        // Terms checkbox 2 (for step 2) is always checked and read-only
+        termsCheckbox2.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent changing state
+            showMessageBox('You must agree to the Terms of Service to proceed.', 'info');
+        });
+
+        // Continue button (Step 1 to Step 2)
+        continueButton.addEventListener('click', async () => {
+            const username = robloxUsernameInput.value.trim();
+            if (!username) {
+                showMessageBox('Please enter your Roblox username.', 'error');
+                return;
+            }
+            if (!isTermsAgreed) {
+                showMessageBox('You must agree to the Terms of Service.', 'error');
+                return;
+            }
+
+            // Add loading state to button
+            continueButton.innerHTML = '<div class="spinner"></div> Generating...';
+            continueButton.disabled = true;
+
+            try {
+                const response = await fetch(generateCodeURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to generate verification code.');
+                }
+
+                // Store the verification code for later use
+                window.currentVerificationCode = data.verificationCode;
+                verifyPhraseInput.value = data.verificationCode;
+
+                // Smooth transition between steps
+                step1.style.opacity = '0';
+                step1.style.transform = 'translateY(-20px)';
+                step1.style.pointerEvents = 'none';
+
+                setTimeout(() => {
+                    step1.classList.add('hidden');
+                    step2.classList.remove('hidden');
+                    step2.style.opacity = '0';
+                    step2.style.transform = 'translateY(20px)';
+                    step2.style.pointerEvents = 'auto';
+
+                    void step2.offsetWidth;
+
+                    step2.style.opacity = '1';
+                    step2.style.transform = 'translateY(0)';
+
+                    step1Circle.classList.remove('active');
+                    step2Circle.classList.add('active');
+                    progressLine.classList.add('active');
+                }, 500);
+
+            } catch (error) {
+                showMessageBox(error.message, 'error');
+            } finally {
+                // Reset button state
+                continueButton.innerHTML = 'Continue';
+                continueButton.disabled = false;
+            }
+        });
+
+        // Finish button (Step 2 completion)
+        finishButton.addEventListener('click', async () => {
+            const username = robloxUsernameInput.value.trim(); // Get username from step 1
+            const verificationCode = window.currentVerificationCode; // Get stored verification code
+
+            if (!verificationCode) {
+                showMessageBox('Error: No verification code found. Please restart the process.', 'error');
+                goToStep1();
+                return;
+            }
+
+            // Ask user to confirm they added the code with styled dialog
+            const userConfirmed = await showConfirmDialog(
+                'Verification Check', 
+                'Have you added the verification code to your Roblox profile description?',
+                'Yes, I added it', 
+                'Not yet'
+            );
+            
+            if (!userConfirmed) {
+                showMessageBox('Please add the verification code to your Roblox profile description first.', 'info');
+                return;
+            }
+
+            // Add loading state to button
+            finishButton.innerHTML = '<div class="spinner"></div> Verifying...';
+            finishButton.disabled = true;
+
+            // Add a small delay to simulate checking time
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            try {
+                const response = await fetch(verifyUserURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username: username,
+                        verificationCode: verificationCode
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Verification failed.');
+                }
+
+                if (data.verified) {
+                    // Store user data for the session (you can also use localStorage)
+                    sessionStorage.setItem('robloxUser', JSON.stringify(data.user));
+                    
+                    showMessageBox('Verification complete! You are now logged in.', 'info');
+                    // Redirect to bubble.html after a short delay
+                    setTimeout(() => {
+                        window.location.href = 'bubble.html';
+                    }, 1000);
+                } else {
+                    // Show the error message from the backend
+                    throw new Error(data.error || 'Verification failed. Please make sure you have added the verification code to your Roblox profile description.');
+                }
+
+            } catch (error) {
+                showMessageBox(error.message, 'error');
+                // Reset button state
+                finishButton.innerHTML = 'Finish';
+                finishButton.disabled = false;
+            }
+        });
+
+        // Copy button functionality
+        copyButton.addEventListener('click', () => {
+            verifyPhraseInput.select();
+            document.execCommand('copy');
+            copyMessage.classList.add('show');
+            setTimeout(() => {
+                copyMessage.classList.remove('show');
+            }, 2000); // Hide message after 2 seconds
+        });
+
+        // Event listener for clicking on Step 1 circle
+        step1Circle.addEventListener('click', () => {
+            if (!step1Circle.classList.contains('active')) { // Only go back if not already on step 1
+                goToStep1();
+            }
+        });
+
+        // Event listener for clicking on Step 2 circle (if needed to re-verify or go back)
+        step2Circle.addEventListener('click', () => {
+            // You can add logic here if you want clicking step 2 to do something,
+            // e.g., re-generate phrase or just stay on step 2.
+            // For now, it won't do anything if already on step 2.
+        });
+
+
+        // Prevent terms checkbox from being unchecked on step 2
+        termsCheckbox2.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default click behavior
+        });
+
+        // Handle terms of service link clicks
+        termsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showMessageBox('Redirecting to Terms of Service page...', 'info');
+            // In a real app, you would open a new tab/window to your terms.html
+            // window.open('terms.html', '_blank');
+        });
+
+        termsLink2.addEventListener('click', (e) => {
+            e.preventDefault();
+            showMessageBox('Redirecting to Terms of Service page...', 'info');
+            // In a real app, you would open a new tab/window to your terms.html
+            // window.open('terms.html', '_blank');
+        });
+
+        termsLinkInfo.addEventListener('click', (e) => {
+            e.preventDefault();
+            showMessageBox('Redirecting to Terms of Service page...', 'info');
+            // In a real app, you would open a new tab/window to your terms.html
+            // window.open('terms.html', '_blank');
+        });
+
+        // Initial state: Step 1 active
+        document.addEventListener('DOMContentLoaded', () => {
+            step1Circle.classList.add('active');
+            termsCheckboxIcon.classList.add('hidden'); // Ensure checkbox is unchecked initially
+        });
+    </script>
+</body>
+</html>

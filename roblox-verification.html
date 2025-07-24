@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Verification - BubbleDuel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto p-8">
+        <h1 class="text-4xl font-bold text-center mb-8 text-blue-400">Roblox Verification</h1>
+        
+        <!-- Step 1: Generate Code -->
+        <div class="max-w-md mx-auto bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Step 1: Generate Verification Code</h2>
+            <div class="space-y-4">
+                <input 
+                    type="text" 
+                    id="username" 
+                    placeholder="Enter your Roblox username"
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                />
+                <button 
+                    onclick="generateCode()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+                >
+                    Generate Code
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Instructions -->
+        <div id="instructions" class="max-w-md mx-auto bg-gray-800 rounded-lg p-6 mb-6 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Step 2: Update Your Profile</h2>
+            <div class="space-y-4">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <p class="text-sm text-gray-300 mb-2">Add this code to your Roblox profile description:</p>
+                    <p id="verificationCode" class="text-2xl font-mono font-bold text-green-400 text-center bg-gray-900 p-3 rounded border-2 border-green-400"></p>
+                </div>
+                <div class="text-sm text-gray-400">
+                    <p>1. Go to <a href="https://www.roblox.com/my/account#!/info" target="_blank" class="text-blue-400 hover:underline">your Roblox profile settings</a></p>
+                    <p>2. Add the code above to your profile description</p>
+                    <p>3. Click "Verify" below when done</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Verify -->
+        <div id="verifySection" class="max-w-md mx-auto bg-gray-800 rounded-lg p-6 mb-6 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Step 3: Verify</h2>
+            <button 
+                onclick="verifyUser()" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+            >
+                Verify Profile
+            </button>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="max-w-md mx-auto bg-gray-800 rounded-lg p-6 hidden">
+            <h2 class="text-2xl font-semibold mb-4">Verification Result</h2>
+            <div id="resultContent"></div>
+        </div>
+
+        <!-- Quick User Lookup -->
+        <div class="max-w-md mx-auto bg-gray-800 rounded-lg p-6 mt-8">
+            <h2 class="text-2xl font-semibold mb-4">Quick User Lookup</h2>
+            <div class="space-y-4">
+                <input 
+                    type="text" 
+                    id="lookupUsername" 
+                    placeholder="Enter Roblox username to lookup"
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                />
+                <button 
+                    onclick="lookupUser()" 
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+                >
+                    Lookup User
+                </button>
+            </div>
+            <div id="lookupResults" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api-rc3whtemyq-uc.a.run.app';
+        let currentUsername = '';
+        let currentCode = '';
+
+        async function generateCode() {
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/roblox/generate-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUsername = username;
+                    currentCode = data.verificationCode;
+                    
+                    document.getElementById('verificationCode').textContent = data.verificationCode;
+                    document.getElementById('instructions').classList.remove('hidden');
+                    document.getElementById('verifySection').classList.remove('hidden');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        }
+
+        async function verifyUser() {
+            if (!currentUsername || !currentCode) {
+                alert('Please generate a code first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/roblox/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        username: currentUsername, 
+                        verificationCode: currentCode 
+                    })
+                });
+
+                const data = await response.json();
+                
+                const resultsDiv = document.getElementById('results');
+                const contentDiv = document.getElementById('resultContent');
+                
+                if (data.success && data.verified) {
+                    contentDiv.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-green-400 text-6xl mb-4">✓</div>
+                            <h3 class="text-xl font-semibold text-green-400 mb-4">Verification Successful!</h3>
+                            <div class="bg-gray-700 rounded-lg p-4">
+                                ${data.user.avatarUrl ? `<img src="${data.user.avatarUrl}" alt="Avatar" class="w-20 h-20 rounded-full mx-auto mb-3">` : ''}
+                                <p class="font-semibold">${data.user.username}</p>
+                                ${data.user.displayName ? `<p class="text-gray-400">${data.user.displayName}</p>` : ''}
+                                <p class="text-sm text-gray-500 mt-2">User ID: ${data.user.id}</p>
+                                <p class="text-sm text-gray-500">Verified at: ${new Date(data.user.verifiedAt).toLocaleString()}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    contentDiv.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-red-400 text-6xl mb-4">✗</div>
+                            <h3 class="text-xl font-semibold text-red-400 mb-4">Verification Failed</h3>
+                            <div class="bg-red-900/20 border border-red-500 rounded-lg p-4">
+                                <p class="text-red-400">${data.error}</p>
+                                ${data.currentDescription ? `<p class="text-sm text-gray-400 mt-2">Current description: "${data.currentDescription}"</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.classList.remove('hidden');
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        }
+
+        async function lookupUser() {
+            const username = document.getElementById('lookupUsername').value.trim();
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/roblox/user/${encodeURIComponent(username)}`);
+                const data = await response.json();
+                
+                const resultsDiv = document.getElementById('lookupResults');
+                
+                if (data.success) {
+                    resultsDiv.innerHTML = `
+                        <div class="bg-gray-700 rounded-lg p-4 mt-4">
+                            <div class="flex items-center space-x-4">
+                                ${data.user.avatarUrl ? `<img src="${data.user.avatarUrl}" alt="Avatar" class="w-16 h-16 rounded-full">` : ''}
+                                <div>
+                                    <h4 class="font-semibold text-lg">${data.user.username}</h4>
+                                    ${data.user.displayName ? `<p class="text-gray-400">${data.user.displayName}</p>` : ''}
+                                    <p class="text-sm text-gray-500">ID: ${data.user.id}</p>
+                                    ${data.user.created ? `<p class="text-sm text-gray-500">Joined: ${new Date(data.user.created).toLocaleDateString()}</p>` : ''}
+                                </div>
+                            </div>
+                            ${data.user.description ? `<div class="mt-4 p-3 bg-gray-800 rounded border-l-4 border-blue-400"><p class="text-sm">${data.user.description}</p></div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="bg-red-900/20 border border-red-500 rounded-lg p-4 mt-4">
+                            <p class="text-red-400">${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('lookupResults').innerHTML = `
+                    <div class="bg-red-900/20 border border-red-500 rounded-lg p-4 mt-4">
+                        <p class="text-red-400">Network error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

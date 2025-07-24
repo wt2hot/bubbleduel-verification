@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BubbleDuel - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blackest-night': '#0D0D10',
+                        'eclipse': '#15161B',
+                        'off-white': '#F1F1F1',
+                        'steel-mist': '#8A8D99',
+                        'sky-pulse': '#3C60FF',
+                        'cyber-candy': '#C040FF',
+                        'neon-aura': '#6A8FFF',
+                        'pulse-pink': '#E060FF',
+                        'border-dark': '#0A0A0C',
+                        'chat-card-bg': '#0D0E13',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0D0D10;
+        }
+        
+        .admin-card {
+            background: linear-gradient(135deg, #15161B 0%, #1A1B21 100%);
+            border: 1px solid #0A0A0C;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #3C60FF 0%, #6A8FFF 100%);
+            animation: pulse-glow 3s ease-in-out infinite alternate;
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, #E060FF 0%, #C040FF 100%);
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, #00D4AA 0%, #00B894 100%);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, #FDCB6E 0%, #E17055 100%);
+        }
+        
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px rgba(60, 96, 255, 0.3); }
+            100% { box-shadow: 0 0 30px rgba(60, 96, 255, 0.6); }
+        }
+        
+        .table-row:hover {
+            background-color: #15161B;
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+        
+        .admin-button {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .admin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #15161B;
+            border-left-color: #3C60FF;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-blackest-night text-off-white">
+    <!-- Navigation -->
+    <nav class="bg-eclipse border-b border-border-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl font-bold">
+                            <span class="text-cyber-candy">Bubble</span><span class="text-sky-pulse">Duel</span>
+                        </span>
+                    </div>
+                    <div class="ml-6">
+                        <span class="text-steel-mist">Admin Panel</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="logoutBtn" class="bg-pulse-pink hover:bg-cyber-candy px-4 py-2 rounded-lg transition-colors duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-eclipse min-h-screen border-r border-border-dark">
+            <nav class="mt-8">
+                <div class="px-4">
+                    <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-2 active" data-section="dashboard">
+                        <i class="fas fa-chart-bar mr-3"></i>
+                        Dashboard
+                    </button>
+                    <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-2" data-section="users">
+                        <i class="fas fa-users mr-3"></i>
+                        User Management
+                    </button>
+                    <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-2" data-section="bans">
+                        <i class="fas fa-ban mr-3"></i>
+                        Ban Management
+                    </button>
+                    <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-2" data-section="analytics">
+                        <i class="fas fa-analytics mr-3"></i>
+                        Analytics
+                    </button>
+                    <button class="sidebar-item w-full text-left px-4 py-3 rounded-lg mb-2" data-section="settings">
+                        <i class="fas fa-cog mr-3"></i>
+                        Settings
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section">
+                <h1 class="text-3xl font-bold mb-8">Admin Dashboard</h1>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card p-6 rounded-xl text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-80">Total Users</p>
+                                <p class="text-3xl font-bold" id="totalUsers">1,247</p>
+                            </div>
+                            <i class="fas fa-users text-2xl opacity-80"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card success p-6 rounded-xl text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-80">Online Users</p>
+                                <p class="text-3xl font-bold" id="onlineUsers">89</p>
+                            </div>
+                            <i class="fas fa-circle text-2xl opacity-80"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card danger p-6 rounded-xl text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-80">Banned Users</p>
+                                <p class="text-3xl font-bold" id="bannedUsers">23</p>
+                            </div>
+                            <i class="fas fa-ban text-2xl opacity-80"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card warning p-6 rounded-xl text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-80">Active Games</p>
+                                <p class="text-3xl font-bold" id="activeGames">45</p>
+                            </div>
+                            <i class="fas fa-gamepad text-2xl opacity-80"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="admin-card p-6 rounded-xl mb-8">
+                    <h2 class="text-xl font-bold mb-4">Recent Activity</h2>
+                    <div class="space-y-4" id="recentActivity">
+                        <!-- Activity items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="admin-card p-6 rounded-xl">
+                    <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button class="admin-button bg-sky-pulse hover:bg-neon-aura p-4 rounded-lg text-center">
+                            <i class="fas fa-broadcast-tower text-2xl mb-2"></i>
+                            <p>Send Announcement</p>
+                        </button>
+                        <button class="admin-button bg-pulse-pink hover:bg-cyber-candy p-4 rounded-lg text-center">
+                            <i class="fas fa-server text-2xl mb-2"></i>
+                            <p>Server Maintenance</p>
+                        </button>
+                        <button class="admin-button bg-steel-mist hover:bg-off-white hover:text-blackest-night p-4 rounded-lg text-center">
+                            <i class="fas fa-download text-2xl mb-2"></i>
+                            <p>Export Data</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management Section -->
+            <div id="users-section" class="section hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold">User Management</h1>
+                    <div class="flex space-x-4">
+                        <input type="text" id="userSearch" placeholder="Search users..." class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-64">
+                        <button id="sendCredits" class="admin-button bg-green-500 hover:bg-green-400 px-4 py-2 rounded-lg">
+                            <i class="fas fa-coins mr-2"></i>Send Credits
+                        </button>
+                        <button id="refreshUsers" class="admin-button bg-sky-pulse hover:bg-neon-aura px-4 py-2 rounded-lg">
+                            <i class="fas fa-refresh mr-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-card rounded-xl overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-border-dark">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">User</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Credits</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Join Date</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Last Active</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable" class="divide-y divide-border-dark">
+                            <!-- User rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ban Management Section -->
+            <div id="bans-section" class="section hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold">Ban Management</h1>
+                    <button id="addBan" class="admin-button bg-pulse-pink hover:bg-cyber-candy px-4 py-2 rounded-lg">
+                        <i class="fas fa-ban mr-2"></i>Add Ban
+                    </button>
+                </div>
+
+                <div class="admin-card rounded-xl overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-border-dark">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">User</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Reason</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Banned By</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Ban Date</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Expires</th>
+                                <th class="px-6 py-4 text-left text-xs font-medium text-steel-mist uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bansTable" class="divide-y divide-border-dark">
+                            <!-- Ban rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics-section" class="section hidden">
+                <h1 class="text-3xl font-bold mb-8">Analytics</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div class="admin-card p-6 rounded-xl">
+                        <h2 class="text-xl font-bold mb-4">User Registrations</h2>
+                        <canvas id="userChart" width="400" height="200"></canvas>
+                    </div>
+                    
+                    <div class="admin-card p-6 rounded-xl">
+                        <h2 class="text-xl font-bold mb-4">Daily Active Users</h2>
+                        <canvas id="activityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <div class="admin-card p-6 rounded-xl">
+                    <h2 class="text-xl font-bold mb-4">Revenue Analytics</h2>
+                    <canvas id="revenueChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings-section" class="section hidden">
+                <h1 class="text-3xl font-bold mb-8">Settings</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="admin-card p-6 rounded-xl">
+                        <h2 class="text-xl font-bold mb-4">Site Settings</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-steel-mist mb-2">Maintenance Mode</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="maintenanceMode" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-steel-mist mb-2">Max Users Online</label>
+                                <input type="number" id="maxUsers" value="1000" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-steel-mist mb-2">Chat Rate Limit (msgs/min)</label>
+                                <input type="number" id="chatRateLimit" value="10" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-card p-6 rounded-xl">
+                        <h2 class="text-xl font-bold mb-4">Admin Actions</h2>
+                        <div class="space-y-4">
+                            <button class="admin-button w-full bg-sky-pulse hover:bg-neon-aura p-3 rounded-lg text-left">
+                                <i class="fas fa-database mr-3"></i>
+                                Backup Database
+                            </button>
+                            <button class="admin-button w-full bg-pulse-pink hover:bg-cyber-candy p-3 rounded-lg text-left">
+                                <i class="fas fa-trash mr-3"></i>
+                                Clear Chat Logs
+                            </button>
+                            <button class="admin-button w-full bg-steel-mist hover:bg-off-white hover:text-blackest-night p-3 rounded-lg text-left">
+                                <i class="fas fa-sync mr-3"></i>
+                                Reset User Sessions
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ban Modal -->
+    <div id="banModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="admin-card p-6 rounded-xl max-w-md w-full">
+                <h2 class="text-xl font-bold mb-4">Ban User</h2>
+                <form id="banForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-steel-mist mb-2">Username</label>
+                        <input type="text" id="banUsername" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-steel-mist mb-2">Reason</label>
+                        <textarea id="banReason" rows="3" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full" required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-steel-mist mb-2">Duration</label>
+                        <select id="banDuration" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full">
+                            <option value="1">1 Day</option>
+                            <option value="7">1 Week</option>
+                            <option value="30">1 Month</option>
+                            <option value="365">1 Year</option>
+                            <option value="permanent">Permanent</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancelBan" class="px-4 py-2 bg-steel-mist rounded-lg hover:bg-off-white hover:text-blackest-night">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-pulse-pink rounded-lg hover:bg-cyber-candy">Ban User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Credits Modal -->
+    <div id="creditsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="admin-card p-6 rounded-xl max-w-md w-full">
+                <h2 class="text-xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-coins mr-2"></i>Send Credits
+                </h2>
+                <form id="creditsForm">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-steel-mist mb-2">Username</label>
+                        <input type="text" id="creditsUsername" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full" placeholder="Enter username..." required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-steel-mist mb-2">Amount</label>
+                        <div class="relative">
+                            <input type="number" id="creditsAmount" min="1" max="10000" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full pl-8" placeholder="0" required>
+                            <i class="fas fa-coins absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-400"></i>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-steel-mist mb-2">Reason (Optional)</label>
+                        <textarea id="creditsReason" rows="2" class="bg-eclipse border border-border-dark rounded-lg px-4 py-2 w-full" placeholder="e.g., Event reward, Bug compensation..."></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-steel-mist mb-2">Quick Amounts</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" class="quick-amount bg-border-dark hover:bg-steel-mist px-3 py-2 rounded text-sm" data-amount="100">100</button>
+                            <button type="button" class="quick-amount bg-border-dark hover:bg-steel-mist px-3 py-2 rounded text-sm" data-amount="500">500</button>
+                            <button type="button" class="quick-amount bg-border-dark hover:bg-steel-mist px-3 py-2 rounded text-sm" data-amount="1000">1K</button>
+                            <button type="button" class="quick-amount bg-border-dark hover:bg-steel-mist px-3 py-2 rounded text-sm" data-amount="5000">5K</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancelCredits" class="px-4 py-2 bg-steel-mist rounded-lg hover:bg-off-white hover:text-blackest-night">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-green-500 rounded-lg hover:bg-green-400">
+                            <i class="fas fa-paper-plane mr-2"></i>Send Credits
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <div class="bg-sky-pulse text-white p-4 rounded-lg shadow-lg">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i>
+                <span id="notificationText">Action completed successfully!</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin Panel JavaScript
+        class AdminPanel {
+            constructor() {
+                this.currentSection = 'dashboard';
+                this.users = [];
+                this.bans = [];
+                this.apiBase = 'https://api-rc3whtemyq-uc.a.run.app';
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadInitialData();
+                this.setupCharts();
+                this.updateDashboard();
+            }
+
+            async loadInitialData() {
+                try {
+                    await Promise.all([
+                        this.loadUsers(),
+                        this.loadBans(),
+                        this.loadStats()
+                    ]);
+                } catch (error) {
+                    console.error('Failed to load initial data:', error);
+                    this.showNotification('Failed to load data from server', 'error');
+                }
+            }
+
+            setupEventListeners() {
+                // Sidebar navigation
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const section = e.target.closest('.sidebar-item').dataset.section;
+                        this.switchSection(section);
+                    });
+                });
+
+                // Ban modal
+                document.getElementById('addBan').addEventListener('click', () => {
+                    document.getElementById('banModal').classList.remove('hidden');
+                });
+
+                document.getElementById('cancelBan').addEventListener('click', () => {
+                    document.getElementById('banModal').classList.add('hidden');
+                });
+
+                document.getElementById('banForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addBan();
+                });
+
+                // Credits modal
+                document.getElementById('sendCredits').addEventListener('click', () => {
+                    document.getElementById('creditsModal').classList.remove('hidden');
+                });
+
+                document.getElementById('cancelCredits').addEventListener('click', () => {
+                    document.getElementById('creditsModal').classList.add('hidden');
+                });
+
+                document.getElementById('creditsForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.sendCredits();
+                });
+
+                // Quick amount buttons
+                document.querySelectorAll('.quick-amount').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const amount = button.dataset.amount;
+                        document.getElementById('creditsAmount').value = amount;
+                    });
+                });
+
+                // User search
+                document.getElementById('userSearch').addEventListener('input', (e) => {
+                    this.searchUsers(e.target.value);
+                });
+
+                // Refresh users
+                document.getElementById('refreshUsers').addEventListener('click', () => {
+                    this.loadUsers();
+                    this.showNotification('Users refreshed successfully!');
+                });
+
+                // Logout
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    window.location.href = 'bubble.html';
+                });
+            }
+
+            switchSection(section) {
+                // Hide all sections
+                document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+                
+                // Show selected section
+                document.getElementById(`${section}-section`).classList.remove('hidden');
+                
+                // Update sidebar
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.dataset.section === section) {
+                        item.classList.add('active');
+                    }
+                });
+
+                this.currentSection = section;
+
+                // Load section-specific data
+                if (section === 'users') {
+                    this.loadUsers();
+                } else if (section === 'bans') {
+                    this.loadBans();
+                } else if (section === 'analytics') {
+                    this.updateCharts();
+                }
+            }
+
+            async loadUsers() {
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/users`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.users = data.users;
+                        this.renderUsers(this.users);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to load users:', error);
+                    this.showNotification('Failed to load users', 'error');
+                    // Fallback to mock data
+                    this.loadMockUsers();
+                }
+            }
+
+            async loadBans() {
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/bans`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.bans = data.bans;
+                        this.renderBans(this.bans);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to load bans:', error);
+                    this.showNotification('Failed to load bans', 'error');
+                    // Fallback to mock data
+                    this.loadMockBans();
+                }
+            }
+
+            async loadStats() {
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/stats`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.updateStatsDisplay(data.stats);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to load stats:', error);
+                    // Use mock stats
+                    this.updateStatsDisplay({
+                        totalUsers: 1247,
+                        onlineUsers: 89,
+                        bannedUsers: 23,
+                        activeGames: 45
+                    });
+                }
+            }
+
+            loadMockUsers() {
+                this.users = [
+                    { id: 1, username: 'PlayerOne', status: 'online', joinDate: '2024-01-15', lastActive: '2 minutes ago', credits: 1250, avatar: 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39ac8859840/150/150/AvatarHeadshot/Png' },
+                    { id: 2, username: 'GamerTwo', status: 'offline', joinDate: '2024-02-20', lastActive: '1 hour ago', credits: 850, avatar: 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39ac8859840/150/150/AvatarHeadshot/Png' },
+                    { id: 3, username: 'ProPlayer', status: 'banned', joinDate: '2024-01-10', lastActive: '3 days ago', credits: 0, avatar: 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39ac8859840/150/150/AvatarHeadshot/Png' },
+                    { id: 4, username: 'NewUser', status: 'online', joinDate: '2024-07-20', lastActive: 'Just now', credits: 500, avatar: 'https://tr.rbxcdn.com/38c6edcb50633730ff4cf39ac8859840/150/150/AvatarHeadshot/Png' },
+                ];
+                this.renderUsers(this.users);
+            }
+
+            loadMockBans() {
+                this.bans = [
+                    { id: 1, username: 'ProPlayer', reason: 'Cheating', bannedBy: 'AdminUser', banDate: '2024-07-20', expires: '2024-08-20' },
+                    { id: 2, username: 'ToxicUser', reason: 'Harassment', bannedBy: 'ModeratorUser', banDate: '2024-07-15', expires: 'Permanent' },
+                ];
+                this.renderBans(this.bans);
+            }
+
+            renderUsers(users) {
+                const tbody = document.getElementById('usersTable');
+                tbody.innerHTML = '';
+
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row';
+                    
+                    const statusColor = user.status === 'online' ? 'text-green-400' : 
+                                       user.status === 'banned' ? 'text-red-400' : 'text-steel-mist';
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img class="h-10 w-10 rounded-full" src="${user.avatar}" alt="">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-off-white">${user.username}</div>
+                                    <div class="text-sm text-steel-mist">ID: ${user.id}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
+                                ${user.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-400 font-medium">
+                            <i class="fas fa-coins mr-1"></i>
+                            ${user.credits || 0}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-steel-mist">${user.joinDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-steel-mist">${this.formatLastActive(user.lastActive)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                ${user.status !== 'banned' ? 
+                                    `<button onclick="adminPanel.banUser('${user.username}')" class="text-red-400 hover:text-red-300">
+                                        <i class="fas fa-ban"></i>
+                                    </button>` : 
+                                    `<button onclick="adminPanel.unbanUser('${user.username}')" class="text-green-400 hover:text-green-300">
+                                        <i class="fas fa-unlock"></i>
+                                    </button>`
+                                }
+                                <button onclick="adminPanel.viewUser(${user.id})" class="text-sky-pulse hover:text-neon-aura">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="adminPanel.sendCreditsToUser('${user.username}')" class="text-green-400 hover:text-green-300">
+                                    <i class="fas fa-coins"></i>
+                                </button>
+                                <button onclick="adminPanel.deleteUser(${user.id})" class="text-red-400 hover:text-red-300">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            renderBans(bans) {
+                const tbody = document.getElementById('bansTable');
+                tbody.innerHTML = '';
+
+                bans.forEach(ban => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row';
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-off-white">${ban.username}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-steel-mist">${ban.reason}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-steel-mist">${ban.bannedBy}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-steel-mist">${ban.banDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-steel-mist">${ban.expires || 'Permanent'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <button onclick="adminPanel.unbanUser('${ban.username}')" class="text-green-400 hover:text-green-300">
+                                    <i class="fas fa-unlock"></i>
+                                </button>
+                                <button onclick="adminPanel.editBan(${ban.id})" class="text-sky-pulse hover:text-neon-aura">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            async addBan() {
+                const username = document.getElementById('banUsername').value;
+                const reason = document.getElementById('banReason').value;
+                const duration = document.getElementById('banDuration').value;
+                
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/ban`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, reason, duration })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.getElementById('banModal').classList.add('hidden');
+                        document.getElementById('banForm').reset();
+                        
+                        // Reload data
+                        await this.loadBans();
+                        await this.loadUsers();
+                        await this.loadStats();
+                        
+                        this.showNotification(`${username} has been banned successfully!`, 'success');
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to ban user:', error);
+                    this.showNotification(error.message || 'Failed to ban user', 'error');
+                }
+            }
+
+            async sendCredits() {
+                const username = document.getElementById('creditsUsername').value.trim();
+                const amount = parseInt(document.getElementById('creditsAmount').value);
+                const reason = document.getElementById('creditsReason').value.trim();
+                
+                if (!username || !amount || amount <= 0) {
+                    this.showNotification('Please enter a valid username and amount', 'error');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/send-credits`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            username, 
+                            amount, 
+                            reason: reason || 'Admin credit transfer',
+                            adminUser: 'AdminUser'
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.getElementById('creditsModal').classList.add('hidden');
+                        document.getElementById('creditsForm').reset();
+                        
+                        this.showNotification(`Successfully sent ${amount} credits to ${username}!`, 'success');
+                        this.updateDashboard(); // Refresh activity log
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to send credits:', error);
+                    this.showNotification(error.message || 'Failed to send credits', 'error');
+                }
+            }
+
+            sendCreditsToUser(username) {
+                document.getElementById('creditsUsername').value = username;
+                document.getElementById('creditsModal').classList.remove('hidden');
+            }
+
+            banUser(username) {
+                document.getElementById('banUsername').value = username;
+                document.getElementById('banModal').classList.remove('hidden');
+            }
+
+            async unbanUser(username) {
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/unban`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Reload data
+                        await this.loadBans();
+                        await this.loadUsers();
+                        await this.loadStats();
+                        
+                        this.showNotification(`${username} has been unbanned successfully!`, 'success');
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to unban user:', error);
+                    this.showNotification(error.message || 'Failed to unban user', 'error');
+                }
+            }
+
+            async deleteUser(userId) {
+                if (confirm('Are you sure you want to delete this user?')) {
+                    try {
+                        const response = await fetch(`${this.apiBase}/admin/users/${userId}`, {
+                            method: 'DELETE'
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Reload data
+                            await this.loadUsers();
+                            await this.loadStats();
+                            
+                            this.showNotification('User deleted successfully!', 'success');
+                        } else {
+                            throw new Error(data.error);
+                        }
+                    } catch (error) {
+                        console.error('Failed to delete user:', error);
+                        this.showNotification(error.message || 'Failed to delete user', 'error');
+                    }
+                }
+            }
+
+            async viewUser(userId) {
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/users/${userId}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const user = data.user;
+                        alert(`User Details:\nUsername: ${user.username}\nEmail: ${user.email || 'N/A'}\nStatus: ${user.status}\nJoin Date: ${user.joinDate}\nRoblox ID: ${user.robloxId || 'N/A'}`);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch user details:', error);
+                    this.showNotification('Failed to load user details', 'error');
+                }
+            }
+
+            async searchUsers(query) {
+                if (!query.trim()) {
+                    this.loadUsers();
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${this.apiBase}/admin/search/users?q=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.renderUsers(data.results);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    console.error('Search failed:', error);
+                    // Fallback to local search
+                    const filteredUsers = this.users.filter(user => 
+                        user.username.toLowerCase().includes(query.toLowerCase())
+                    );
+                    this.renderUsers(filteredUsers);
+                }
+            }
+
+            updateStatsDisplay(stats) {
+                document.getElementById('totalUsers').textContent = stats.totalUsers;
+                document.getElementById('onlineUsers').textContent = stats.onlineUsers;
+                document.getElementById('bannedUsers').textContent = stats.bannedUsers;
+                document.getElementById('activeGames').textContent = stats.activeGames;
+            }
+
+            updateDashboard() {
+                // Update recent activity with credit transactions
+                const activities = [
+                    { icon: 'fas fa-coins', text: 'Credits sent: 500 to PlayerOne', time: '1 min ago', color: 'text-yellow-400' },
+                    { icon: 'fas fa-user-plus', text: 'New user registered: NewUser', time: '2 min ago', color: 'text-green-400' },
+                    { icon: 'fas fa-ban', text: 'User banned: ProPlayer', time: '15 min ago', color: 'text-red-400' },
+                    { icon: 'fas fa-gamepad', text: 'New game started', time: '32 min ago', color: 'text-sky-pulse' },
+                    { icon: 'fas fa-dollar-sign', text: 'Payment received: $25.00', time: '1 hour ago', color: 'text-green-400' },
+                    { icon: 'fas fa-cog', text: 'System maintenance completed', time: '2 hours ago', color: 'text-steel-mist' }
+                ];
+
+                const activityContainer = document.getElementById('recentActivity');
+                activityContainer.innerHTML = '';
+
+                activities.forEach(activity => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between p-3 bg-border-dark rounded-lg';
+                    div.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="${activity.icon} ${activity.color} mr-3"></i>
+                            <span class="text-off-white">${activity.text}</span>
+                        </div>
+                        <span class="text-steel-mist text-sm">${activity.time}</span>
+                    `;
+                    activityContainer.appendChild(div);
+                });
+            }
+
+            formatLastActive(lastActive) {
+                try {
+                    const date = new Date(lastActive);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffMins = Math.floor(diffMs / (1000 * 60));
+                    
+                    if (diffMins < 1) return 'Just now';
+                    if (diffMins < 60) return `${diffMins} min ago`;
+                    
+                    const diffHours = Math.floor(diffMins / 60);
+                    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                    
+                    const diffDays = Math.floor(diffHours / 24);
+                    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                } catch (error) {
+                    return lastActive;
+                }
+            }
+
+            setupCharts() {
+                // User registrations chart
+                const userCtx = document.getElementById('userChart').getContext('2d');
+                this.userChart = new Chart(userCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                        datasets: [{
+                            label: 'User Registrations',
+                            data: [65, 89, 120, 181, 256, 389, 412],
+                            borderColor: '#3C60FF',
+                            backgroundColor: 'rgba(60, 96, 255, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#F1F1F1' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#8A8D99' },
+                                grid: { color: '#0A0A0C' }
+                            },
+                            y: {
+                                ticks: { color: '#8A8D99' },
+                                grid: { color: '#0A0A0C' }
+                            }
+                        }
+                    }
+                });
+
+                // Activity chart
+                const activityCtx = document.getElementById('activityChart').getContext('2d');
+                this.activityChart = new Chart(activityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Daily Active Users',
+                            data: [234, 312, 289, 456, 378, 298, 234],
+                            backgroundColor: '#6A8FFF'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#F1F1F1' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#8A8D99' },
+                                grid: { color: '#0A0A0C' }
+                            },
+                            y: {
+                                ticks: { color: '#8A8D99' },
+                                grid: { color: '#0A0A0C' }
+                            }
+                        }
+                    }
+                });
+
+                // Revenue chart
+                const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+                this.revenueChart = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [
+                            {
+                                label: 'Revenue',
+                                data: [1250, 1890, 2340, 2100],
+                                borderColor: '#C040FF',
+                                backgroundColor: 'rgba(192, 64, 255, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Expenses',
+                                data: [650, 720, 890, 950],
+                                borderColor: '#E060FF',
+                                backgroundColor: 'rgba(224, 96, 255, 0.1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#F1F1F1' }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#8A8D99' },
+                                grid: { color: '#0A0A0C' }
+                            },
+                            y: {
+                                ticks: { color: '#8A8D99' },
+                                grid: { color: '#0A0A0C' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateCharts() {
+                // Update chart data with new random data
+                const newUserData = Array.from({length: 7}, () => Math.floor(Math.random() * 200) + 50);
+                const newActivityData = Array.from({length: 7}, () => Math.floor(Math.random() * 300) + 100);
+                
+                this.userChart.data.datasets[0].data = newUserData;
+                this.activityChart.data.datasets[0].data = newActivityData;
+                
+                this.userChart.update();
+                this.activityChart.update();
+                this.revenueChart.update();
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                const text = document.getElementById('notificationText');
+                
+                text.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Initialize admin panel
+        const adminPanel = new AdminPanel();
+
+        // Auto-update dashboard every 30 seconds
+        setInterval(() => {
+            adminPanel.updateDashboard();
+        }, 30000);
+    </script>
+</body>
+</html>
