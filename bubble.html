@@ -825,6 +825,130 @@
             padding-top: 1rem;
             border-top: 1px solid #0A0A0C;
         }
+
+        /* User Bar Styles */
+        .userbar-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* 12px */
+        }
+        .userbar-card {
+            background-color: #15161B; /* eclipse */
+            border: 2.5px solid #0A0A0C; /* border-dark */
+            border-radius: 1.25rem; /* 20px */
+            padding: 0.5rem 1rem; /* 8px 16px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #F1F1F1;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            height: 56px; /* Consistent height */
+            position: relative; /* For progress bar positioning */
+        }
+        .userbar-card:hover {
+            background-color: #1f2027;
+            border-color: #1f2027;
+        }
+        .userbar-card svg {
+            width: 24px;
+            height: 24px;
+            color: #8A8D99; /* steel-mist */
+        }
+        .level-badge-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* 12px */
+            width: 100%;
+        }
+        .profile-pfp-placeholder {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem; /* 16px */
+            color: #F1F1F1;
+            flex-shrink: 0;
+            background-color: #8A8D99; /* steel-mist */
+            margin-right: 0.75rem; /* 12px */
+        }
+        .level-badge-text {
+            font-size: 1rem; /* 16px */
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .level-badge-bar {
+            position: absolute;
+            bottom: 10px; 
+            left: 1rem; 
+            width: 120px; /* Adjusted width */
+            height: 5px; 
+            background-color: #0D0D10; /* blackest-night */
+            border-radius: 2.5px;
+            overflow: hidden;
+        }
+        .level-badge-progress {
+            width: 40%; /* Example progress from image */
+            height: 100%;
+            background: linear-gradient(90deg, #6A8FFF, #C040FF);
+            border-radius: 2.5px;
+        }
+
+    .wallet-button {
+        font-family: 'Inter', sans-serif;
+        /* Pink and Blue Gradient background with a smooth transition and more blue */
+        background-image: linear-gradient(to right, #E060FF, #3C60FF, #1d4ed8); /* pulse-pink -> sky-pulse -> deeper blue */
+        background-size: 200% auto; /* For animation effect */
+        background-position: 0% center; /* Start with the left side of the gradient visible */
+        color: white;
+        padding: 1rem 2.5rem; /* Increased padding for a larger button */
+        border-radius: 9999px; /* Fully rounded */
+        font-weight: 900; /* Made even bolder (900) */
+        font-size: 1.25rem; /* Larger text */
+        transition: all 0.5s ease-in-out; /* Smooth transitions for hover effects */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+        cursor: pointer;
+        outline: none; /* Remove outline on focus */
+        border: none; /* Remove default button border */
+        position: relative;
+        overflow: hidden; /* Hide overflow for shimmer effect */
+    }
+
+    /* Hover effect: shift gradient */
+    .wallet-button:hover {
+        background-position: right center; /* Move gradient to the right */
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* Larger shadow on hover */
+        transform: translateY(-3px); /* Slight lift effect */
+    }
+
+    /* Active effect: subtle press */
+    .wallet-button:active {
+        transform: translateY(1px);
+        box-shadow: 0 5px 10px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Optional: Shimmer effect for continuous animation */
+    .wallet-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: skewX(-20deg);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { left: -75%; }
+        50% { left: 100%; }
+        100% { left: -75%; }
+    }
     </style>
 </head>
 <body class="bg-blackest-night text-off-white min-h-screen flex flex-col">
@@ -846,14 +970,15 @@
             </a>
         </div>
         <div class="flex items-center space-x-4">
-            <button id="walletButton" class="bg-eclipse text-steel-mist px-7 py-3 rounded-full hover:bg-border-dark transition-colors duration-300 flex items-center space-x-2 shadow-lg transform hover:scale-105 border border-border-dark">
-                <i class="fas fa-wallet text-sky-pulse text-xl"></i>
-                <span id="walletBalance" class="font-bold text-xl">Loading...</span>
+            <button id="walletButton" class="wallet-button">
+                WALLET
             </button>
             <button class="bg-cyber-candy text-off-white px-7 py-3 rounded-full hover:bg-pulse-pink transition-colors duration-300 flex items-center space-x-2 shadow-lg transform hover:scale-105" id="loginButton">
                 <i class="fas fa-sign-in-alt text-xl"></i>
                 <span class="font-bold text-xl">Login</span>
             </button>
+            <!-- User Bar Container (populated after login) -->
+            <div id="userBarContainer"></div>
         </div>
     </nav>
 
@@ -1112,7 +1237,7 @@
                             <span class="bot-game">BGSI</span>
                         </div>
                     </div>
-                    <button class="join-button" onclick="alert('Joining PucekGoatedFr!')">Join</button>
+                    <button class="join-button" onclick="return false;">Join</button>
                 </div>
 
                 <!-- Bot Card 2: ZedGoatedFr -->
@@ -1130,7 +1255,7 @@
                             <span class="bot-game">BGSI</span>
                         </div>
                     </div>
-                    <button class="join-button" onclick="alert('Joining ZedGoatedFr!')">Join</button>
+                    <button class="join-button" onclick="return false;">Join</button>
                 </div>
 
                 <!-- Bot Card 3: TharskyGoatedFr -->
@@ -1148,7 +1273,7 @@
                             <span class="bot-game">BGSI</span>
                         </div>
                     </div>
-                    <button class="join-button" onclick="alert('Joining TharskyGoatedFr!')">Join</button>
+                    <button class="join-button" onclick="return false;">Join</button>
                 </div>
 
                 <!-- Bot Card 4: Bsgi_Flip (Offline) -->
@@ -1166,7 +1291,7 @@
                             <span class="bot-game">BGSI</span>
                         </div>
                     </div>
-                    <button class="join-button" onclick="alert('Joining Bsgi_Flip!')">Join</button>
+                    <button class="join-button" onclick="return false;">Join</button>
                 </div>
             </div>
 
@@ -1518,187 +1643,161 @@
 
         // Check for logged-in user and update UI
         function checkUserSession() {
-            const userData = sessionStorage.getItem('robloxUser');
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    updateLoginButton(user);
-                } catch (error) {
-                    console.error('Error parsing user data:', error);
-                    sessionStorage.removeItem('robloxUser');
-                }
-            }
-        }
-
-        // Update login button to show user avatar
-        function updateLoginButton(user) {
+            const user = JSON.parse(sessionStorage.getItem('robloxUser'));
             const loginButton = document.getElementById('loginButton');
-            if (loginButton && user.avatarUrl) {
-                // Create image element with error handling
-                const avatarImg = document.createElement('img');
-                avatarImg.src = user.avatarUrl;
-                avatarImg.alt = user.username;
-                avatarImg.className = 'w-10 h-10 rounded-full border-2 border-sky-pulse';
-                
-                // Handle broken images
-                avatarImg.onerror = function() {
-                    this.src = `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id || Math.floor(Math.random() * 1000000)}&width=150&height=150&format=png`;
-                    this.onerror = function() {
-                        // Final fallback to a simple avatar
-                        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjNkE4RkZGIi8+Cjx0ZXh0IHg9Ijc1IiB5PSI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0YxRjFGMSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjQ4IiBmb250LXdlaWdodD0iYm9sZCI+PjwvdGV4dD4KPHN2Zz4=';
-                        this.onerror = null; // Prevent infinite loops
-                    };
-                };
-                
-                loginButton.innerHTML = '';
-                loginButton.appendChild(avatarImg);
-                
-                const usernameSpan = document.createElement('span');
-                usernameSpan.className = 'font-bold text-xl';
-                usernameSpan.textContent = user.username;
-                loginButton.appendChild(usernameSpan);
-                
-                loginButton.classList.remove('bg-cyber-candy', 'hover:bg-pulse-pink');
-                loginButton.classList.add('bg-eclipse', 'hover:bg-border-dark', 'border', 'border-border-dark');
-                
-                // Update click behavior to show user menu instead of redirecting to login
-                loginButton.onclick = (e) => {
-                    e.preventDefault();
-                    showUserMenu(user);
-                };
-            }
-        }
+            const userBarContainer = document.getElementById('userBarContainer');
+            const walletButton = document.getElementById('walletButton');
 
-        // Show user menu when avatar is clicked
-        function showUserMenu(user) {
-            // Create dropdown menu
-            const existingMenu = document.getElementById('userMenu');
-            if (existingMenu) {
-                existingMenu.remove();
-            }
+            if (user) {
+                // User is logged in
+                loginButton.style.display = 'none';
+                // walletButton.style.display = 'none'; // Keep original wallet button visible
 
-            const menu = document.createElement('div');
-            menu.id = 'userMenu';
-            menu.className = 'absolute top-full right-0 mt-2 bg-eclipse border border-border-dark rounded-lg shadow-xl z-50 min-w-48';
-            
-            // Create avatar with error handling
-            const menuAvatarImg = document.createElement('img');
-            menuAvatarImg.src = user.avatarUrl;
-            menuAvatarImg.alt = user.username;
-            menuAvatarImg.className = 'w-12 h-12 rounded-full';
-            menuAvatarImg.onerror = function() {
-                this.src = `https://www.roblox.com/headshot-thumbnail/image?userId=${user.id || Math.floor(Math.random() * 1000000)}&width=150&height=150&format=png`;
-                this.onerror = function() {
-                    this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjNkE4RkZGIi8+Cjx0ZXh0IHg9Ijc1IiB5PSI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0YxRjFGMSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjQ4IiBmb250LXdlaWdodD0iYm9sZCI+PjwvdGV4dD4KPHN2Zz4=';
-                    this.onerror = null;
-                };
-            };
-            
-            menu.innerHTML = `
-                <div class="p-4 border-b border-border-dark">
-                    <div class="flex items-center space-x-3">
-                        <div id="menuAvatar" class="w-12 h-12"></div>
-                        <div>
-                            <p class="font-bold text-off-white">${user.username}</p>
-                            <p class="text-steel-mist text-sm">${user.displayName || user.username}</p>
+                const firstLetter = user.username.charAt(0).toUpperCase();
+
+                // Create a more complex user bar
+                userBarContainer.innerHTML = `
+                <style>
+                    .userbar-container {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem; /* 12px */
+                    }
+                    .userbar-card {
+                        background-color: #15161B; /* eclipse */
+                        border: 2.5px solid #0A0A0C; /* border-dark */
+                        border-radius: 1.25rem; /* 20px */
+                        padding: 0.5rem 1rem; /* 8px 16px */
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 600;
+                        color: #F1F1F1;
+                        transition: all 0.2s ease-in-out;
+                        cursor: pointer;
+                        height: 56px; /* Consistent height */
+                        position: relative; /* For progress bar positioning */
+                    }
+                    .userbar-card:hover {
+                        background-color: #1f2027;
+                        border-color: #1f2027;
+                    }
+                    .userbar-card svg {
+                        width: 24px;
+                        height: 24px;
+                        color: #8A8D99; /* steel-mist */
+                    }
+                    .level-badge-container {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem; /* 12px */
+                        width: 100%;
+                    }
+                    .profile-pfp-placeholder {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 700;
+                        font-size: 1rem; /* 16px */
+                        color: #F1F1F1;
+                        flex-shrink: 0;
+                        background-color: #8A8D99; /* steel-mist */
+                        margin-right: 0.75rem; /* 12px */
+                    }
+                    .level-badge-text {
+                        font-size: 1rem; /* 16px */
+                        font-weight: 600;
+                        white-space: nowrap;
+                    }
+                    .level-badge-bar {
+                        position: absolute;
+                        bottom: 10px; 
+                        left: 1rem; 
+                        width: 120px; /* Adjusted width */
+                        height: 5px; 
+                        background-color: #0D0D10; /* blackest-night */
+                        border-radius: 2.5px;
+                        overflow: hidden;
+                    }
+                    .level-badge-progress {
+                        width: 40%; /* Example progress from image */
+                        height: 100%;
+                        background: linear-gradient(90deg, #6A8FFF, #C040FF);
+                        border-radius: 2.5px;
+                    }
+                </style>
+                <div class="userbar-container">
+                    <!-- Notifications Card -->
+                    <div class="userbar-card" style="padding: 0.75rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                        </svg>
+                    </div>
+
+                    <!-- Level Card -->
+                    <div class="userbar-card" style="padding: 0.5rem 1rem; width: 220px;">
+                        <div class="level-badge-container">
+                            <span class="level-badge-text">Level 0 &rarr; 1</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-steel-mist ml-auto">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
+                        <div class="level-badge-bar">
+                            <div class="level-badge-progress"></div>
                         </div>
                     </div>
+
+                    <!-- Profile Card -->
+                    <div class="userbar-card" style="padding: 0.5rem 1rem 0.5rem 0.5rem;">
+                        <div class="profile-pfp-placeholder">
+                            <span>${firstLetter}</span>
+                        </div>
+                        <span>@${user.username}</span>
+                    </div>
                 </div>
-                <div class="p-2">
-                    <button onclick="logout()" class="w-full text-left px-3 py-2 text-steel-mist hover:text-off-white hover:bg-border-dark rounded transition-colors duration-200">
-                        <i class="fas fa-sign-out-alt mr-2"></i>
-                        Logout
-                    </button>
-                </div>
-            `;
+                `;
 
-            // Append the avatar to the designated spot
-            const menuAvatarContainer = menu.querySelector('#menuAvatar');
-            menuAvatarContainer.appendChild(menuAvatarImg);
-
-            // Position menu relative to login button
-            const loginButton = document.getElementById('loginButton');
-            loginButton.parentElement.style.position = 'relative';
-            loginButton.parentElement.appendChild(menu);
-
-            // Close menu when clicking outside
-            setTimeout(() => {
-                document.addEventListener('click', function closeMenu(e) {
-                    if (!menu.contains(e.target) && !loginButton.contains(e.target)) {
-                        menu.remove();
-                        document.removeEventListener('click', closeMenu);
-                    }
-                });
-            }, 100);
-        }
-
-        // Logout function
-        function logout() {
-            sessionStorage.removeItem('robloxUser');
-            window.location.reload(); // Reload page to reset UI
-        }
-
-        // Show chat rules modal
-        chatOptionsButton.addEventListener('click', () => {
-            chatRulesModal.classList.remove('hidden');
-        });
-
-        // Hide chat rules modal
-        // Chat rules modal
-        understandButton.addEventListener('click', () => {
-            chatRulesModal.classList.add('hidden');
-        });
-
-        // Chat input events are now handled by Firebase module
-
-        // Confirmation Modal Functionality
-        const confirmationModal = document.getElementById('confirmationModal');
-        const closeConfirmationModal = document.getElementById('closeConfirmationModal');
-        const confirmActionButton = document.getElementById('confirmActionButton');
-        const cancelActionButton = document.getElementById('cancelActionButton');
-        const confirmationModalIcon = document.getElementById('confirmationModalIcon');
-        const confirmationModalTitle = document.getElementById('confirmationModalTitle');
-        const confirmationModalMessage = document.getElementById('confirmationModalMessage');
-
-        // Store the current action to be confirmed
-        let currentConfirmationAction = null;
-
-        // Function to show confirmation modal
-        function showConfirmationModal(config) {
-            confirmationModalIcon.className = `fas ${config.icon} confirmation-modal-icon`;
-            confirmationModalTitle.textContent = config.title;
-            confirmationModalMessage.textContent = config.message;
-            confirmActionButton.textContent = config.confirmText;
-            currentConfirmationAction = config.action;
-            confirmationModal.classList.remove('hidden');
-        }
-
-        // Hide the modal when the close icon is clicked
-        closeConfirmationModal.addEventListener('click', () => {
-            confirmationModal.classList.add('hidden');
-            currentConfirmationAction = null;
-        });
-
-        // Hide the modal when the cancel button is clicked
-        cancelActionButton.addEventListener('click', () => {
-            confirmationModal.classList.add('hidden');
-            currentConfirmationAction = null;
-        });
-
-        // Handle the confirmation action
-        confirmActionButton.addEventListener('click', () => {
-            if (currentConfirmationAction) {
-                currentConfirmationAction();
+            } else {
+                // User is not logged in
+                loginButton.style.display = 'flex';
+                userBarContainer.innerHTML = '';
+                walletButton.style.display = 'flex'; // Show original wallet button
             }
-            confirmationModal.classList.add('hidden');
-            currentConfirmationAction = null;
-        });
+        }
+
+        // Function to show a custom confirmation dialog
+        function showConfirmationDialog(title, message, onConfirm) {
+            const modal = document.getElementById('confirmationModal');
+            const titleElement = document.getElementById('confirmationModalTitle');
+            const messageElement = document.getElementById('confirmationModalMessage');
+            const confirmButton = document.getElementById('confirmActionButton');
+            const cancelButton = document.getElementById('cancelActionButton');
+
+            titleElement.textContent = title;
+            messageElement.textContent = message;
+
+            // Show the modal
+            modal.classList.remove('hidden');
+
+            // Set up confirm button action
+            confirmButton.onclick = () => {
+                onConfirm();
+                modal.classList.add('hidden');
+            };
+
+            // Set up cancel button action
+            cancelButton.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
 
         // Hide modal if clicked outside (on the overlay)
         confirmationModal.addEventListener('click', (event) => {
             if (event.target === confirmationModal) {
                 confirmationModal.classList.add('hidden');
-                currentConfirmationAction = null;
             }
         });
 
@@ -1707,17 +1806,15 @@
         if (logoutButton) {
             logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                showConfirmationModal({
-                    icon: 'fa-sign-out-alt',
-                    title: 'Log out of your account?',
-                    message: "Are you sure you want to log out? You'll need to log in again to access your account.",
-                    confirmText: 'Yes, log out',
-                    action: () => {
+                showConfirmationDialog(
+                    'Log out of your account?',
+                    "Are you sure you want to log out? You'll need to log in again to access your account.",
+                    () => {
                         console.log('User logged out');
                         // Add actual logout logic here
                         alert('Logged out successfully!');
                     }
-                });
+                );
             });
         }
 
@@ -1726,17 +1823,15 @@
         if (playNowButton) {
             playNowButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                showConfirmationModal({
-                    icon: 'fa-gamepad',
-                    title: 'Start Playing?',
-                    message: 'Are you ready to enter the game? This will redirect you to the game lobby.',
-                    confirmText: 'Yes, start playing',
-                    action: () => {
+                showConfirmationDialog(
+                    'Start Playing?',
+                    'Are you ready to enter the game? This will redirect you to the game lobby.',
+                    () => {
                         console.log('Starting game...');
                         // Add game start logic here
                         alert('Starting game...');
                     }
-                });
+                );
             });
         }
 
@@ -1745,17 +1840,15 @@
         if (gamePlayButton) {
             gamePlayButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                showConfirmationModal({
-                    icon: 'fa-dice',
-                    title: 'Join Game?',
-                    message: 'Are you sure you want to join this game? Make sure you understand the rules and betting requirements.',
-                    confirmText: 'Yes, join game',
-                    action: () => {
+                showConfirmationDialog(
+                    'Join Game?',
+                    'Are you sure you want to join this game? Make sure you understand the rules and betting requirements.',
+                    () => {
                         console.log('Joining game...');
                         // Add game join logic here
                         alert('Joining game...');
                     }
-                });
+                );
             });
         }
 
@@ -2052,11 +2145,6 @@
         function redirectToLogin() {
             window.location.href = 'login.html';
         }
-        
-        // Add initial click and focus listeners for chat input that redirect to login
-        chatInput.addEventListener('click', redirectToLogin);
-        chatInput.addEventListener('focus', redirectToLogin);
-        chatInput.addEventListener('keydown', redirectToLogin);
         
         // Function to send a message
         function sendMessage(text) {
